@@ -1,0 +1,254 @@
+<%-include("../partials/UserHeader")-%>
+        <div class="page-header breadcrumb-wrap">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="index.html" rel="nofollow">Home</a>
+                    <span></span> Pages
+                    <span></span> Login /Register
+                </div>
+            </div>
+        </div>
+        <section class="pt-100 pb-150">
+            <div class="container">
+                <div class="row ">
+                    <div class="col-lg-10">
+                        <div class="row">
+                           
+                            <div class="col-lg-4"></div>
+                            <div class="col-lg-7">
+                                <div class="login_wrap widget-taber-content p-30 background-white border-radius-5">
+                                    <div class="padding_eight_all bg-white">
+                                        <div class="heading_s1">
+                                            <h3 class="mb-30">Create an Account</h3>
+                                        </div>
+                                        <div>
+                                           <style>
+                                            .succmsg{
+                                                background-color: aquamarine;
+                                                text-align: center;
+                                                color: white;
+                                            }
+                                            .errmsg{
+                                                background-color: rgb(236, 109, 109);
+                                                text-align: center;
+                                                color: white;
+                                            }
+                                            
+                                           </style>
+                                            <% if(errmsg){%>
+                                                <p class="errmsg" id="errmsg"><%= errmsg%></p>
+                                                <%}else{%>
+                                                    <p class="succmsg" id="succmsg"><%= succmsg%></p>
+                                                <%}%>
+                                        </div>
+                                        <p class="mb-50 font-sm">
+                                            Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our privacy policy
+                                        </p>
+                                        <form method="post" action="/signup" onsubmit= "return userRegisterValidation()" >
+                                            <style>
+                                                small{
+                                                color: red;
+                                            }
+                                            </style>
+                                            <div class="form-group">
+                                                <input type="text"  name="Firstname" placeholder="Firstname" id="Firstname">
+                                                <small id="firstNameError"></small>
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text"  name="Lastname" placeholder="Lastname" id="Lastname">
+                                                <small id="lastNameError"></small>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text"  name="Phone" placeholder="Phone Number" id="Phone">
+                                                <small id="phoneError"></small>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <input type=""  name="Email" placeholder="Email" id="Email">
+                                                <small id="emailError"></small>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="input-group">
+                                                  <input type="text" class="form-control"  name="otp" placeholder="OTP" id="Otp">
+                                                
+                                                  <!-- <span id="countdown" style="display: none;">00:20</span>  -->
+
+                                                  <div class="input-group-append">
+                                                    <button class="btn btn-primary" type="button" onclick="sendOTP()" id="sendOTPButton">Send OTP</button>
+                                                    <button class="btn btn-primary" type="button" onclick="sendOTP()" style="display: none;" id="resendOTPButton">Resend OTP</button>
+                                                  </div>
+                                                </div>
+                                                <small id="otpError"></small>
+                                              </div>
+                                            <div class="form-group">
+                                                <input  type="password" name="Password" placeholder="Password" id="password">
+                                                <small id="passwordError"></small>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <input  type="password" name="conPassword" placeholder="Confirm password" id="conPassword" >
+                                                <small id="confirmPasswordError"></small>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="row justify-content-center">
+                                                    <div class="col-md-6">
+                                                      <div class="form-group text-center">
+                                                        <button type="submit" class="btn btn-fill-out btn-block hover-up" name="login">Register</button>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                            </div>
+                                        </form>
+                                        <div class="divider-text-center mt-15 mb-15">
+                                            <span> or</span>
+                                        </div>
+                                        <div class="text-muted text-center">Already have an account? <a href="/login">Sign in now</a></div>
+                                    </div>
+                                </div>
+                            </div>
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <%-include("../partials/UserFooter")-%>  
+
+<script>
+
+let minutes = 0;
+let seconds = 20;
+
+function restartCountdown() {
+    // Reset the countdown to the initial values
+    minutes = 0;
+    seconds = 20;
+    // localStorage.setItem('countdownTimestamp', Date.now()); // Store the current timestamp
+    updateCountdown();
+}
+
+function updateCountdown() {
+    const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+    const formattedSeconds = seconds < 10 ? '0' + seconds : seconds;
+    document.getElementById('countdown').innerText = formattedMinutes + ':' + formattedSeconds + ' minutes remaining.';
+}
+
+function countdown() {
+    if (minutes === 0 && seconds === 0) {
+        // Timer reached 0:00
+        // Perform actions when the timer reaches zero
+        // alert('Timer reached 0:00!');
+
+        Swal.fire({
+                icon: 'warning',
+                title: 'Otp Expired',
+                text: 'Your Otp has Expired.',
+            });
+
+    } else {
+        if (seconds === 0) {
+            minutes--;
+            seconds = 59;
+        } else {
+            seconds--;
+        }
+
+        updateCountdown();
+        setTimeout(countdown, 1000); // Update every second
+    }
+}
+
+
+
+
+let timer;
+
+function startTimer() {
+    console.log("startTimer");
+    document.getElementById('sendOTPButton').style.display = 'none';
+    document.getElementById('resendOTPButton').style.display = 'inline-block';
+    document.getElementById('resendOTPButton').disabled = true;
+    // document.getElementById('countdown').style.display = 'inline-block';
+    // countdown();
+
+    timer = setTimeout(() => {
+        document.getElementById('resendOTPButton').disabled = false;
+        
+        Swal.fire({
+                icon: 'warning',
+                title: 'Otp Expired',
+                text: 'Your Otp has Expired.',
+            });
+        // countdown();
+    }, 30 * 1000); 
+}
+// 5 * 60 * 1000
+    function sendOTP() {
+        console.log("send OTP");
+      const Email = document.getElementById("Email").value
+      const emailError = document.getElementById("emailError")
+      let isValid = true;
+    const emailRegex = /^[A-Za-z0-9._%-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}$/;
+
+      function clearErrorWithDelay(errorField) {
+       setTimeout(() => {
+          errorField.innerHTML = '';
+       }, 5000); // 5000 milliseconds = 5 seconds
+    }
+    function validateEmail() {
+       if (Email.trim() === '') {
+          emailError.innerHTML = 'Email cannot be empty';
+          clearErrorWithDelay(emailError);
+          isValid = false;
+       } else if (!emailRegex.test(Email)) {
+          emailError.innerHTML = 'Please enter a valid email';
+          clearErrorWithDelay(emailError);
+          isValid = false;
+       } else {
+          emailError.innerHTML = ''; // Clear error message
+       }
+       return isValid
+    }
+ 
+        if(validateEmail()){
+            fetch('/send-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ Email: Email }),
+            })
+
+            Swal.fire({
+                icon: 'info',
+                title: 'OTP Send',
+                text: 'Otp has been sent to your e-mail.',
+            });
+            startTimer()
+            if(minutes == 0 && seconds == 0){
+                restartCountdown()
+            }
+
+        }
+}
+
+    //   .then((response) => {
+    //     if (!response.ok) {
+    //       throw new Error(`Failed to send OTP: ${response.statusText}`);
+    //     }
+    //     return response.text();
+    //   })
+    //   .then((data) => {
+    //     console.log(data); // Log the response (success or failure) to the console
+    //     // Handle the response as needed
+    //   })
+    //   .catch((error) => {
+    //     console.error(error);
+    //     // Handle the error
+    //   });
+</script>
+
