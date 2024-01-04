@@ -16,7 +16,10 @@ adminroute.post('/',adminMiddleware.islogout, adminController.adminLogin);
 
 adminroute.get('/home',adminMiddleware.islogin,adminController.Admindashboad)
 
-adminroute.get('/users',adminController.loadUser)
+adminroute.get('/users',adminController.Userlist)
+adminroute.post('/statusUpdate',adminController.statusUpdate)
+
+
 
 
 

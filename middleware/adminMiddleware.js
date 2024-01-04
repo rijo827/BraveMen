@@ -1,3 +1,4 @@
+
 const islogout = (req, res, next) => {
     if (! req.session.adminID) {
       console.log("User not loged in!");   

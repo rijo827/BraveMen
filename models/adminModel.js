@@ -12,7 +12,10 @@ const  adminSchema =  new mongoose.Schema({
      Password: {
         type: String,
         required: true,
-      }
+      },
+      jwt_token: {
+         type: String
+       }
 })
 
 

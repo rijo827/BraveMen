@@ -24,6 +24,9 @@ const UserSchema = new mongoose.Schema({
   Blocked:{ 
     type:Boolean,
     default:false
+  },
+  jwt_token: {
+    type: String
   }
 });
 

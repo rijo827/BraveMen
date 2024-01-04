@@ -7,11 +7,13 @@ const nocache = require('nocache');
 const { v4: uuidv4 } = require('uuid');
 const env = require('dotenv');
 // const logger=require('morgan')
+const cookieParser= require("cookie-parser")
 const path = require('path');
 const app = express();
 
 env.config({ path: './.env' });
 app.set('view engine', 'ejs');
+app.use(cookieParser());
 
 app.use(express.json())
 

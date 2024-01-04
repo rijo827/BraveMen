@@ -1,5 +1,5 @@
 const adminModel = require("../models/adminModel")
-
+const userModel= require('../models/userModel')
 
 
 
@@ -33,6 +33,12 @@ console.log("its logging ....");
   }
 }
 
+
+
+
+
+
+
 const adminLogged  = async (req,res)=>{
 console.log("adminLogged....");
   try {
@@ -63,19 +69,41 @@ const Admindashboad= async (req,res)=>{
   }
 }
 
-const loadUser= async (req,res)=>{
-console.log("loadUser ====>>>");
-  try {
-    res.render("Userslist",{isAuthenticted: true})
-  } catch (error) {
-    
+const Userlist= async (req,res)=>{
+  console.log("Userlist ====>>>");
+  
+  const User= await userModel.find()
+  console.log("User>>>>>",User);
+  console.log("User>>>>>",User.length);
+    try {
+      res.render("Userslist",{isAuthenticted: true,user:User})
+    } catch (error) {
+      
+    }
   }
-}
+
+  const statusUpdate= async (req,res)=>{
+    console.log("statusUpdate ====>>>");
+    const userId = req.body.userId;
+    console.log(userId);
+    const User= await userModel.findOne({_id:userId})
+    console.log("User>>>>>",User);
+    console.log("User>>>>>",User.Email);
+    User.Blocked = !User.Blocked;
+    await User.save();
+      try {
+        return res.json({ success: true, isAuthenticted: true,user:User });
+
+      } catch (error) {
+        console.log(error);
+      }
+    }
 
 
 module.exports = {
   adminLogin,
   adminLogged,
   Admindashboad,
-  loadUser
+  Userlist,
+  statusUpdate
 }

@@ -1,6 +1,9 @@
 const userModel = require("../models/userModel");
 const nodemailer = require("nodemailer");
 const randomstring = require("randomstring");
+const jwt = require('jsonwebtoken');
+const UserModel = require("moongose/models/user_model");
+const bcrypt = require('bcrypt');
 
 // let generatedOtp = "";
 const transporter = nodemailer.createTransport({
@@ -139,29 +142,25 @@ const forgotPassword =async (req,res)=>{
 
 const insertUser = async (req, res) => {
   try {
-    console.log("insertUser");
-    // const Firstname = req.body.Firstname;
-    // const Lastname = req.body.Lastname;
-    // const Phone = req.body.Phone;
-    // const Password = req.body.Password;
-    // const Email = req.body.Email;
-
+    
     const {Firstname,Lastname,Phone,Password,Email}=req.body
     const checkdata = await userModel.findOne({ Email: Email });
-  console.log("Firstname>>>>",Firstname);
-  console.log(Firstname,Lastname,Phone,Password,Email);
     if (checkdata) {
       console.log("checkdata   ===>>>  ", checkdata);
       res.redirect("/signup?err=true&msg=Email Already Exists");
     } else {
+
+      let newPassword = await bcrypt.hash(Password,10);
+
+      console.log("newPassword======>>>>>",newPassword);
       const User = new userModel({
         Firstname: Firstname,
         Lastname: Lastname,
         Email: Email,
-        Password: Password,
+        Password: newPassword,
         Phone: Phone,
       });
-
+    
       const isVerifiedPromise = verifiOtp(Email, req.body.otp);
       
       isVerifiedPromise.then((isVerified) => {
@@ -181,12 +180,24 @@ const insertUser = async (req, res) => {
         console.log(isVerified);
       });
 
+
       const saveUser =  ( async ()=>{
        await User.save();
-        req.session.userID = User._id;
+        // req.session.userID = User._id;
+        let payload={UserID: User._id}
+        const token = jwt.sign(payload, process.env.SECRATE_KEY, { expiresIn: '1d' });
+        console.log(" payload=====>>>",payload);
+       
+          console.log("token======>>>>",token);
+     
+          res.cookie('jwttoken', token, { httpOnly: true });
+          res.cookie('userID', payload.UserID, { httpOnly: true });
+      // localStorage.setItem("access_token",payload)
         console.log(" req.session.userID  ===>>", req.session.userID);
         console.log("Account created successfully");
         res.redirect("/");
+        User.jwt_token=token;
+
       })
     
     }
@@ -234,9 +245,27 @@ const loggingUser= async (req,res)=>{
 
     if(User){
           if(User.Password === password){
-            req.session.userID=User._id
-            console.log(" Yes Its  U");
-            res.redirect('/')
+            // req.session.userID=User._id
+
+            let payload={UserID: User._id}
+            console.log(" payload=====>>>",payload);
+            const token = jwt.sign(payload, process.env.SECRATE_KEY, { expiresIn: '1d' });
+            if(token){
+              User.jwt_token= token;
+              User.save().then(()=>{
+                console.log("token======>>>>",token);
+                res.cookie('jwttoken', token, { httpOnly: true });
+                res.cookie('userID', payload.UserID, { httpOnly: true })
+                console.log(" Yes Its  U");
+                res.redirect('/')
+              }).catch((err)=>{
+                res.redirect("/login?err=true&msg= Something went wrong!");
+              })
+         
+            }else{
+              res.redirect("/login?err=true&msg= You are  not Autherized!");
+            }
+              
           }
           else{
             res.redirect("/login?err=true&msg=Incorrect Password!");
@@ -252,8 +281,14 @@ const loggingUser= async (req,res)=>{
 }
 
 const loadhome = async(req,res)=>{
-  let user = req.session.userID;
-  if(user){
+  // let user = req.session.userID;
+  let user = req.cookies?.jwttoken
+  let userID=req.cookies?.userID
+  console.log("userId >>>>>>",userID);
+  if(user && userID){
+
+   let thisUser = await userModel.findById(userID);
+   console.log("User name>>>>", thisUser.Firstname)
     res.render("home",{isAuthenticted: true})
   }else{
     res.render("home",{isAuthenticted: false})
@@ -263,8 +298,9 @@ const loadhome = async(req,res)=>{
 const userAccountGet = async(req,res)=>{
 
   try {
-    let user = req.session.userID;
-  if(user){
+    let token = req.cookies.jwttoken;
+    let userID=req.cookies.userID
+  if(token){
     res.render("userAccount",{isAuthenticted:true})
     // res.render("home",{isAuthenticted: true})
   }else{
@@ -274,9 +310,18 @@ const userAccountGet = async(req,res)=>{
   } catch (error) {
     
   }
-  
-  
 }
+ const loggoutUser = async (req,res)=>{
+
+  let user = req.cookies?.jwttoken
+
+  if(user){
+    res.clearCookie('jwttoken');
+    console.log("its cleared");
+    res.redirect('/')
+  }
+
+ }
 
 module.exports = {
   insertUser,
@@ -288,5 +333,6 @@ module.exports = {
   loadLogin,
   loggingUser,
   loadhome,
-  userAccountGet
+  userAccountGet,
+  loggoutUser,
 };

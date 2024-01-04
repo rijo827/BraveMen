@@ -2,7 +2,6 @@ const express= require('express')
 const userroute=express()
 const userControler = require("../controllers/userController")
 const userMiddleware = require("../middleware/UserMiddleware")
-
 const bodyParser = require("body-parser")
 
 userroute.set('views','./views/Userview')
@@ -10,10 +9,13 @@ userroute.set('views','./views/Userview')
 userroute.use(bodyParser.urlencoded({extended: false}))
 
 userroute.get('/',userControler.loadhome)
-userroute.get('/account',userControler.userAccountGet)
+userroute.get('/account', userMiddleware.islogin,userControler.userAccountGet)
 
-userroute.get('/login',userMiddleware.islogout, userControler.loadLogin)
+userroute.get('/login', userMiddleware.islogout, userControler.loadLogin)
 userroute.post('/login',userMiddleware.islogout, userControler.loggingUser)
+userroute.get('/logout', userControler.loggoutUser)
+
+
 
 userroute.get('/forgotPassword',userMiddleware.islogout, userControler.forgotPassword)
 userroute.post('/reset',userMiddleware.islogout, userControler.updatePassword)
