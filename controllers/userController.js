@@ -2,7 +2,6 @@ const userModel = require("../models/userModel");
 const nodemailer = require("nodemailer");
 const randomstring = require("randomstring");
 const jwt = require('jsonwebtoken');
-const UserModel = require("moongose/models/user_model");
 const bcrypt = require('bcrypt');
 
 // let generatedOtp = "";
@@ -82,9 +81,8 @@ const verifiOtp = async (Email, otp, req, res) => {
 };
 
 
-const updatePassword= async (req,res)=>{
 
-
+const updatePassword = async (req, res) => {
   try {
     console.log("Updated Password");
     const Email = req.body.Email;
@@ -94,30 +92,34 @@ const updatePassword= async (req,res)=>{
     const user = await userModel.findOne({ Email: Email });
 
     if (user) {
-      // Update the password
-      if(user.Password===newPassword){
-        console.log("You Cant give same Password");
-        res.redirect("/forgotPassword?err=true&msg=You Cant give same Password")
-      }
-      else{
-      user.Password = newPassword;
-      await user.save();
-   console.log("Password updated successfully");  
-       res.redirect("/login")   
+      // Compare the provided password with the hashed password in the database
+      const isPasswordMatch = await bcrypt.compare(newPassword, user.Password);
 
+      if (isPasswordMatch) {
+        console.log("You can't use the same password");
+        res.redirect("/forgotPassword?err=true&msg=You can't use the same password");
+      } else {
+        
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+        
+        
+        user.Password = hashedPassword;
+        await user.save();
+
+        console.log("Password updated successfully");
+        res.redirect("/login");
       }
     } else {
-      // User not found
-     console.log("User not found ");
-     res.redirect("/forgotPassword?err=true&msg=User not found")
-
+      
+      console.log("User not found ");
+      res.redirect("/forgotPassword?err=true&msg=User not found");
     }
   } catch (error) {
     console.error(error);
-    
   }
+};
 
-}
 
 const forgotPassword =async (req,res)=>{
   
@@ -149,15 +151,11 @@ const insertUser = async (req, res) => {
       console.log("checkdata   ===>>>  ", checkdata);
       res.redirect("/signup?err=true&msg=Email Already Exists");
     } else {
-
-      let newPassword = await bcrypt.hash(Password,10);
-
-      console.log("newPassword======>>>>>",newPassword);
       const User = new userModel({
         Firstname: Firstname,
         Lastname: Lastname,
         Email: Email,
-        Password: newPassword,
+        Password: Password,
         Phone: Phone,
       });
     
@@ -183,6 +181,7 @@ const insertUser = async (req, res) => {
 
       const saveUser =  ( async ()=>{
        await User.save();
+       console.log("password>>>>>>>",User.Password);
         // req.session.userID = User._id;
         let payload={UserID: User._id}
         const token = jwt.sign(payload, process.env.SECRATE_KEY, { expiresIn: '1d' });
@@ -234,51 +233,58 @@ const loadLogin = async (req,res)=>{
   }
 }
 
-
-const loggingUser= async (req,res)=>{
-
+const loggingUser = async (req, res) => {
   try {
-    const Email= req.body.Email
-    const password=req.body.Password
+    const Email = req.body.Email;
+    const password = req.body.Password;
 
     const User = await userModel.findOne({ Email: Email });
 
-    if(User){
-          if(User.Password === password){
-            // req.session.userID=User._id
+    if (User) {
+      // Compare the entered password with the hashed password using bcrypt.compare
+      bcrypt.compare(password, User.Password, (err, result) => {
+        if (err) {
+          // Handle the error
+          console.error(err);
+          res.redirect("/login?err=true&msg=Internal Server Error");
+        } else if (result) {
+          // Passwords match
+          let payload = { UserID: User._id };
+          console.log("payload ====>>>", payload);
 
-            let payload={UserID: User._id}
-            console.log(" payload=====>>>",payload);
-            const token = jwt.sign(payload, process.env.SECRATE_KEY, { expiresIn: '1d' });
-            if(token){
-              User.jwt_token= token;
-              User.save().then(()=>{
-                console.log("token======>>>>",token);
+          const token = jwt.sign(payload, process.env.SECRATE_KEY, { expiresIn: '1d' });
+
+          if (token) {
+            User.jwt_token = token;
+            User.save()
+              .then(() => {
+                console.log("token======>>>>", token);
                 res.cookie('jwttoken', token, { httpOnly: true });
-                res.cookie('userID', payload.UserID, { httpOnly: true })
-                console.log(" Yes Its  U");
-                res.redirect('/')
-              }).catch((err)=>{
-                res.redirect("/login?err=true&msg= Something went wrong!");
+                res.cookie('userID', payload.UserID, { httpOnly: true });
+                console.log("Yes Its U");
+                res.redirect('/');
               })
-         
-            }else{
-              res.redirect("/login?err=true&msg= You are  not Autherized!");
-            }
-              
+              .catch((err) => {
+                res.redirect("/login?err=true&msg=Something went wrong!");
+              });
+          } else {
+            res.redirect("/login?err=true&msg=You are not Authenticated!");
           }
-          else{
-            res.redirect("/login?err=true&msg=Incorrect Password!");
-          }
-      
-    }else{
+        } else {
+          // Passwords do not match
+          res.redirect("/login?err=true&msg=Incorrect Password!");
+        }
+      });
+    } else {
+      // User not found
       res.redirect("/login?err=true&msg=User not Found!");
-  
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
+    res.redirect("/login?err=true&msg=Internal Server Error");
   }
-}
+};
+
 
 const loadhome = async(req,res)=>{
   // let user = req.session.userID;
@@ -300,7 +306,7 @@ const userAccountGet = async(req,res)=>{
   try {
     let token = req.cookies.jwttoken;
     let userID=req.cookies.userID
-  if(token){
+  if(token && userID){
     res.render("userAccount",{isAuthenticted:true})
     // res.render("home",{isAuthenticted: true})
   }else{

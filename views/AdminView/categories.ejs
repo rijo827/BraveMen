@@ -1,0 +1,175 @@
+<%-include("../partials/AdminAsideandHeader")-%>
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Categories </h2>
+                    <p>Add, edit or delete a category</p>
+                </div>
+                <div>
+                    <input type="text" placeholder="Search Categories" class="form-control bg-white">
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                           
+                            <form method="post" action="/admin/category_posted" id="createCategoryForm">
+                                <div>
+                                    <style>
+                                     .succmsg{
+                                         background-color: aquamarine;
+                                         text-align: center;
+                                         color: white;
+                                     }
+                                     .errmsg{
+                                         background-color: rgb(236, 109, 109);
+                                         text-align: center;
+                                         color: white;
+                                     }
+                                     
+                                    </style>
+                                     <% if(errmsg){%>
+                                         <p class="errmsg" id="errmsg"><%= errmsg%></p>
+                                         <%}else{%>
+                                             <p class="succmsg" id="succmsg"><%= succmsg%></p>
+                                         <%}%>
+                                 </div>
+                                <div class="mb-4">
+                                    <label for="product_name" class="form-label">Name</label>
+                                    <input type="text" placeholder="Type here" class="form-control" id="product_name" name="CategoryName" />
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Description</label>
+                                    <textarea placeholder="Type here" class="form-control" name="Description"></textarea>
+                                </div>
+                                <div class="d-grid">
+                                    <button class="btn btn-primary">Create category</button>
+                                </div>
+                            </form>
+                            <form  id="updateCategoryForm" style="display: none;" method="post" action="/admin/updateCategory">
+                                <div>
+                                    <style>
+                                     .succmsg{
+                                         background-color: aquamarine;
+                                         text-align: center;
+                                         color: white;
+                                     }
+                                     .errmsg{
+                                         background-color: rgb(236, 109, 109);
+                                         text-align: center;
+                                         color: white;
+                                     }
+                                     
+                                    </style>
+                                     <% if(errmsg){%>
+                                         <p class="errmsg" id="errmsg"><%= errmsg%></p>
+                                         <%}else{%>
+                                             <p class="succmsg" id="succmsg"><%= succmsg%></p>
+                                         <%}%>
+                                 </div>
+
+                                 <input type="hidden" id="updateCategoryId" name="categoryId" value="">
+                                <div class="mb-4">
+                                    <label for="product_name" class="form-label">Name</label>
+                                    <input type="text" placeholder="Type here" class="form-control" id="edit_product_name" name="newCategoryName" />
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Description</label>
+                                    <textarea placeholder="Type here" class="form-control" name="newDescription" id="newDescription"></textarea>
+                                </div>
+                                <div class="d-grid">
+                                    <button class="btn btn-primary">Update category</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>No.</th>
+                                            <th>Name</th>
+                                            <th>Description</th>
+                                            
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                <% category.forEach(function(item) { %>
+
+                                        <tr id="category_<%= item._id %>">
+                                            <td  ><%= category.indexOf(item)+1 %></td>
+
+                                            <td><b><%=item.CategoryName%></b></td>
+                                            <td><%=item.Description%></td>
+                                            <td class="text-end">
+                                                <td class="text-end">
+                                                    <a class="btn btn-light rounded btn-sm font-sm text-primary edit-category" href="#" data-category="<%= item._id %>">Edit</a>
+                                                    <a class="btn btn-danger rounded btn-sm font-sm delete-category" href="#" data-category="<%= item._id %>">Delete</a>
+                                                </td>
+                                            </td>
+                                        </tr>
+                                <% }); %>
+                                      
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div> 
+                    </div> 
+                </div>
+            </div> 
+        </section> 
+<%-include("../partials/AdminFooter")-%>
+       <script>
+  $(document).ready(function() {
+    $('.delete-category').on('click', function(event) {
+      event.preventDefault();
+
+      const categoryToDelete = $(this).data('category');
+      alert(categoryToDelete)
+      $.ajax({
+        url: '/admin/deleteCategory',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ CategoryName: categoryToDelete }),
+        success: function(response) { 
+          console.log(response);
+           
+           $("#category_"+categoryToDelete).remove();
+        },
+        error: function(error) {
+          console.error(error);
+        }
+      });
+    });
+  });
+$(document).ready(function() {
+      
+        $('.edit-category').on('click', function(event) {
+            event.preventDefault();
+
+         
+            const categoryId = $(this).data('category');
+
+            $.ajax({
+                url: '/admin/getCategoryDetails',
+                method: 'GET',
+                data: { categoryId: categoryId },
+                success: function(response) {
+                   console.log(response.category)
+             $('#updateCategoryId').val(response.category._id);
+           $('#edit_product_name').val(response.category.CategoryName);
+           $('#newDescription').val(response.category.Description);
+                    
+                    $('#createCategoryForm').hide();
+                    $('#updateCategoryForm').show();
+                },
+                error: function(error) {
+                    console.error(error);
+                    
+                }
+            });
+        });
+    });
+    
+</script>
