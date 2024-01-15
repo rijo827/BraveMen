@@ -1,5 +1,6 @@
 const adminModel = require("../models/adminModel")
 const userModel= require('../models/userModel')
+const jwt = require('jsonwebtoken');
 
 
 
@@ -11,12 +12,12 @@ console.log("its logging ....");
         const admin = await adminModel.findOne({UserName: Username})
 
         if(admin){
-          console.log("Inside 1st if");
-
             if(admin.Password===Password){
-          console.log("Inside 2nd if");
-
-              req.session.adminID= admin._id
+              const payload = {adminID:admin._id}
+              console.log("payload ====>>>", payload);
+              const token = jwt.sign(payload, process.env.SECRATE_KEY, { expiresIn: '1d' });    
+              res.cookie('jwttoken', token, { httpOnly: true });
+              res.cookie('adminID', payload.adminID, { httpOnly: true });
               console.log("logged succesully ");
                 res.redirect("/admin/home")
             }

@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const {ObjectId} = mongoose.Schema;
 
 
 
@@ -16,8 +16,9 @@ const productSchema = new mongoose.Schema({
          required:true
     },
     category:{
-        type:String,
-        required:true
+        type:ObjectId,
+        required:true,
+        ref:"CategoryDetails",
     },
     regularPrice :{
             type:Number,
@@ -58,6 +59,18 @@ const productSchema = new mongoose.Schema({
         type:Array,
         required:true
     },
+      type:{
+        type:String,
+        required:true
+      },
+      shippingFees:{
+        type:Number,
+        required:true
+      },
+      taxRate:{
+        type:Number,
+        required:true
+      }
 
 })
 module.exports = mongoose.model("ProductDetails", productSchema,"ProductDetails");

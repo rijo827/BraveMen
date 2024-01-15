@@ -14,7 +14,7 @@
                     <div class="row">
                         <div class="col-md-3">
                            
-                            <form method="post" action="/admin/category_posted" id="createCategoryForm">
+                            <form method="post" action="/admin/category_posted" id="createCategoryForm" onsubmit="return CatgeoryValidation()">
                                 <div>
                                     <style>
                                      .succmsg{
@@ -28,6 +28,7 @@
                                          color: white;
                                      }
                                      
+                                     
                                     </style>
                                      <% if(errmsg){%>
                                          <p class="errmsg" id="errmsg"><%= errmsg%></p>
@@ -35,16 +36,23 @@
                                              <p class="succmsg" id="succmsg"><%= succmsg%></p>
                                          <%}%>
                                  </div>
+                                 <style>
+                                    .err{
+                                        color: red;
+                                    }
+                                 </style>
                                 <div class="mb-4">
                                     <label for="product_name" class="form-label">Name</label>
                                     <input type="text" placeholder="Type here" class="form-control" id="product_name" name="CategoryName" />
+                                    <span id="CategoryNameError" class="err"></span>
                                 </div>
                                 <div class="mb-4">
                                     <label class="form-label">Description</label>
-                                    <textarea placeholder="Type here" class="form-control" name="Description"></textarea>
+                                    <textarea placeholder="Type here" class="form-control" name="Description" id="product_description"></textarea>
+                                    <span id="DescriptionError" class="err"></span>
                                 </div>
                                 <div class="d-grid">
-                                    <button class="btn btn-primary">Create category</button>
+                                    <button class="btn btn-primary" type="submit">Create category</button>
                                 </div>
                             </form>
                             <form  id="updateCategoryForm" style="display: none;" method="post" action="/admin/updateCategory">

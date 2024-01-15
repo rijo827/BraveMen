@@ -1,0 +1,216 @@
+<%-include("../partials/AdminAsideandHeader")-%>
+<section class="content-main">
+  <form action="/admin/addproduct" method="post" id="postform" enctype="multipart/form-data">
+    <div class="row">
+      <div class="col-9">
+        <div class="content-header">
+          <h2 class="content-title">Add New Product</h2>
+          <div>
+            <button
+              class="btn btn-md rounded font-sm hover-up"
+              type="submit" 
+            >
+              Publish
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4>Basic</h4>
+          </div>
+          <div class="card-body">
+            <!-- Product Name -->
+            <div class="mb-4">
+              <label for="product_name" class="form-label">Product Name</label>
+              <input
+                type="text"
+                placeholder="Type here"
+                class="form-control"
+                id="product_name"
+                name="productName"
+              />
+            </div>
+            <!-- Full description -->
+            <div class="mb-4">
+              <label class="form-label">Full description</label>
+              <textarea
+                placeholder="Type here"
+                class="form-control"
+                rows="4"
+                name="Description"
+              ></textarea>
+            </div>
+            <!-- Regular Price and Sale Price -->
+            <div class="row">
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Regular Price</label>
+                    <input
+                      placeholder="$"
+                      type="text"
+                      class="form-control"
+                      name="regularPrice"
+                    />
+                  
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Sale Price</label>
+                  <input
+                    placeholder="$"
+                    type="text"
+                    class="form-control"
+                    name="salePrice"
+                  />
+                </div>
+              </div>
+            </div>
+            <!-- Size, Brand, Stock, Color, Material, Type -->
+            <div class="row">
+              
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Brand</label>
+                  <input
+                    placeholder=""
+                    type="text"
+                    class="form-control"
+                    name="brand"
+                  />
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <label class="form-label">Size</label>
+                <select class="form-select" name="size">
+                  <option>S</option>
+                  <option>M</option>
+                  <option>L</option>
+                  <option>XL</option>
+                  <option>XXL</option>
+                  <option>XXXL</option>
+                </select>
+              </div>
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Stock</label>
+                  <input
+                    placeholder=""
+                    type="text"
+                    class="form-control"
+                    name="stock"
+                  />
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Color</label>
+                  <input
+                    placeholder=""
+                    type="text"
+                    class="form-control"
+                    name="color"
+                  />
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Material</label>
+                  <input
+                    placeholder=""
+                    type="text"
+                    class="form-control"
+                    name="Material"
+                  />
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <label class="form-label">Type</label>
+                <select class="form-select" name="type">
+                  <option>Special</option>
+                  <option>Party</option>
+                </select>
+              </div>
+            </div>
+            <!-- Shipping Fees and Tax Rate -->
+            <div class="card-header">
+              <h4>Shipping</h4>
+            </div>
+            <div class="row">
+              <div class="col-lg-4">
+                <label for="product_name" class="form-label"
+                  >Shipping fees</label
+                >
+                <input
+                  type="text"
+                  placeholder="$"
+                  class="form-control"
+                  id="product_name"
+                  name="shippingFees"
+                />
+              </div>
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Tax rate</label>
+                  <input
+                    type="text"
+                    placeholder="%"
+                    class="form-control"
+                    id="product_name"
+                    name="taxRate"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- card end// -->
+      </div>
+      <div class="col-lg-3">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4>Media</h4>
+          </div>
+          <div class="card-body">
+            <div class="input-upload">
+              <img src="/AdminAssets/imgs/theme/upload.svg" alt="" />
+              <input class="form-control" type="file" name="images" multiple/>
+            </div>
+          </div>
+        </div>
+        <!-- card end// -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4>Categories</h4>
+          </div>
+          <div class="card-body">
+            <div class="row gx-2">
+              <div class="col-sm-12 mb-1">
+                <label class="form-label">Category</label>
+                <select class="form-select" name="category">
+                  <% category.forEach(function(item) { %>
+                  <option value="<%=item._id%>"><%=item.CategoryName%></option>
+                  <% }); %>
+                </select>
+              </div>
+            </div>
+            <!-- row.// -->
+          </div>
+        </div>
+        <!-- card end// -->
+      </div>
+    </div>
+  </form>
+</section>
+<%-include("../partials/AdminFooter")-%>
+<script>
+  function submitForm() {
+    $("#postform").submit(function (event) {
+      event.preventDefault(); // Prevent the default form submission
+      // Additional logic or validation can be added here if needed
+      $(this).unbind("submit").submit(); // Actual form submission
+    });
+  }
+</script>

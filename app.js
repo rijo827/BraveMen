@@ -12,13 +12,18 @@ const path = require('path');
 const app = express();
 const logger= require('morgan')
 
+
+
 env.config({ path: './.env' });
 app.set('view engine', 'ejs');
 app.use(cookieParser());
-app.use(logger("combined"))
+// app.use(logger("combined"))
 app.use(express.json())
 
 app.use(nocache());
+
+
+
 
 app.use(session({
   secret: uuidv4(),

@@ -69,33 +69,38 @@ const updateCategory = async (req, res) => {
   console.log("categoryId =>>>>>", categoryId);
 
   try {
-     
-    const checkdata = await catModel.findById(categoryId)
-    if(checkdata.CategoryName===newCategoryName){
-      console.log("You Can't Use Same Name");
-      res.redirect("/admin/category?err=true&msg=You Can't Use Same Name");
+    const checkdata = await catModel.findById(categoryId);
+    const existingCategories = await catModel.find({}, { CategoryName: 1, _id: 0 });
 
+    const isNameAlreadyExists = existingCategories.some(category => category.CategoryName === newCategoryName);
+
+    if (isNameAlreadyExists) {
+      console.log("This name already exists in category");
+      return res.redirect("/admin/category?err=true&msg=This name already exists in category");
     }
-    else{
-       // Use findByIdAndUpdate to update the existing category
-       const updatedCategory = await catModel.findByIdAndUpdate(
+
+    if (checkdata.CategoryName === newCategoryName) {
+      console.log("You Can't Use Same Name");
+      return res.redirect("/admin/category?err=true&msg=You Can't Use Same Name");
+    } else {
+      const updatedCategory = await catModel.findByIdAndUpdate(
         categoryId,
         { CategoryName: newCategoryName, Description: newDescription },
-        { new: true } // Set to true to return the updated document
-    );
+        { new: true }
+      );
 
-    if (updatedCategory) {
+      if (updatedCategory) {
         console.log("Category updated successfully");
         console.log("Updated category======>>>", updatedCategory);
-        res.redirect("/admin/category");
-    } else {
+        return res.redirect("/admin/category");
+      } else {
         console.log("Category not found");
-        res.redirect("/admin/category?err=true&msg=Category not found");
-    }
+        return res.redirect("/admin/category?err=true&msg=Category not found");
+      }
     }
   } catch (error) {
-      console.log(error);
-      res.redirect("/admin/category?err=true&msg=Something went wrong");
+    console.log(error);
+    return res.redirect("/admin/category?err=true&msg=Something went wrong");
   }
 };
 

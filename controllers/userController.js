@@ -186,12 +186,9 @@ const insertUser = async (req, res) => {
         let payload={UserID: User._id}
         const token = jwt.sign(payload, process.env.SECRATE_KEY, { expiresIn: '1d' });
         console.log(" payload=====>>>",payload);
-       
           console.log("token======>>>>",token);
-     
           res.cookie('jwttoken', token, { httpOnly: true });
           res.cookie('userID', payload.UserID, { httpOnly: true });
-      // localStorage.setItem("access_token",payload)
         console.log(" req.session.userID  ===>>", req.session.userID);
         console.log("Account created successfully");
         res.redirect("/");
