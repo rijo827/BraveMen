@@ -6,10 +6,9 @@ const AccessCatogery = async (req,res)=>{
     const err=req.query.err
     const msg=req.query.msg
     try {
-        let admin = req.session.adminID;
      const Categories= await catModel.find({isActvie:true})
      console.log("Categories>>>>>",Categories);
-        if(admin){
+        if(Categories){
 
           res.render("categories",{ succmsg: '', errmsg: msg ,isAuthenticted:true,category:Categories })
         }else{

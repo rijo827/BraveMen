@@ -14,6 +14,7 @@ adminroute.use(bodyParser.urlencoded({extended: false}))
 
 adminroute.get('/', adminMiddleware.islogout,adminController.adminLogged);
 adminroute.post('/',adminMiddleware.islogout, adminController.adminLogin);
+adminroute.get('/logout',adminController.adminLogout)
 
 
 adminroute.get('/home',adminMiddleware.islogin,adminController.Admindashboad)
@@ -27,7 +28,7 @@ adminroute.get('/category',adminMiddleware.islogin,categoryController.AccessCato
 adminroute.post('/category_posted',adminMiddleware.islogin,categoryController.postCategory)
 adminroute.post('/deleteCategory',categoryController.deleteCategory)
 adminroute.post("/updateCategory",categoryController.updateCategory)
-adminroute.get('/getCategoryDetails', categoryController.getCategoryDetails);
+adminroute.get('/getCategoryDetails',adminMiddleware.islogin, categoryController.getCategoryDetails);
 
 
 

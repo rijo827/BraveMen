@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 
 
 
+
 const adminLogin= async (req,res) =>{
 console.log("its logging ....");
   try {
@@ -12,14 +13,32 @@ console.log("its logging ....");
         const admin = await adminModel.findOne({UserName: Username})
 
         if(admin){
+
             if(admin.Password===Password){
-              const payload = {adminID:admin._id}
+          
+              let payload = { adminID: admin._id };
               console.log("payload ====>>>", payload);
-              const token = jwt.sign(payload, process.env.SECRATE_KEY, { expiresIn: '1d' });    
-              res.cookie('jwttoken', token, { httpOnly: true });
-              res.cookie('adminID', payload.adminID, { httpOnly: true });
-              console.log("logged succesully ");
+          const token = jwt.sign(payload, process.env.SECRATE_KEY, { expiresIn: '1d' });
+          if (token) {
+            admin.jwt_token = token;
+            admin.save()
+              .then(() => {
+                console.log("token======>>>>", token);
+                res.cookie('jwttoken', token, { httpOnly: true });
+                res.cookie('adminID', payload.adminID, { httpOnly: true });
+                console.log("Yes Its U");
+                req.session.adminID= admin._id
+                console.log("logged succesully ");
+                  
                 res.redirect("/admin/home")
+              })
+              .catch((err) => {
+                res.redirect("/admin/?err=true&msg=Something went wrong!");
+              });
+          } else {
+            res.redirect("/admin/?err=true&msg=You are not Authenticated!");
+          }
+             
             }
             else{
               res.redirect("/admin/?err=true&msg=Incorrect Password!");
@@ -55,10 +74,20 @@ console.log("adminLogged....");
   }
 }
 
+const adminLogout = async (req,res)=>{
+
+  let admin = req.cookies?.jwttoken
+  if(admin){
+    res.clearCookie('jwttoken');
+    console.log("its cleared");
+    res.redirect('/admin')
+  }
+}
+
 const Admindashboad= async (req,res)=>{
 
   try {
-    let admin = req.session.adminID;
+    let admin = req.cookies.jwttoken;
     if(admin){
       res.render("home",{isAuthenticted: true})
     }else{
@@ -106,5 +135,6 @@ module.exports = {
   adminLogged,
   Admindashboad,
   Userlist,
-  statusUpdate
+  statusUpdate,
+  adminLogout
 }

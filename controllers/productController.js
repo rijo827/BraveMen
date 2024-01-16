@@ -9,12 +9,11 @@ const categoryModel = require('../models/categoryModel');
 const getAllProduct = async (req,res) =>{
 
   try{
-    let admin = req.session.adminID;
     let products = await ProductModel.find({}).populate("category");
     let category = await categoryModel.find();
     console.log("products.....",products);
     console.log("category.....",category);
-    if(admin){
+    if(products){
     console.log("category in admin.....",category);
 
       res.render("showProduct",{isAuthenticted: true,products:products, categories: category})
@@ -31,12 +30,11 @@ const getAllProduct = async (req,res) =>{
 
 
     try {
-        let admin = req.session.adminID;
         const categoryDetails = await categoryModel.find({isActvie:true});
 
 
   
-        if(admin){
+        if(categoryDetails){
           res.render("addProduct",{isAuthenticted: true,category:categoryDetails})
         }else{
           res.render("addProduct",{isAuthenticted: false})

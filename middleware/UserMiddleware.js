@@ -18,9 +18,9 @@ console.log("token====>>>",token);
         console.log("User loged in!");   
         res.redirect('/');
       }
-      else{
-        res.redirect('/login?err=true&msg=You are not autherized');
-      }
+        else{
+          res.redirect('/login?err=true&msg=You are not autherized');
+        }
     }
   };
 
@@ -28,7 +28,7 @@ console.log("token====>>>",token);
 
   const islogin = async (req, res, next) => {
  
-    if (req.cookies.jwttoken) {
+    if (req.cookies?.jwttoken) {
       console.log("User loged in!");   
       const userID=req.cookies.userID
       const user= await  userModel.findById(userID)
