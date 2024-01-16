@@ -72,9 +72,8 @@ const getAllProduct = async (req,res) =>{
         taxRate
     } = req.body;
  
- const images= req.files
-
- console.log("images===>>>",images);
+    const images = req.files.map(file => file.filename);
+    console.log("images===>>>",images);
  
 try {
   
