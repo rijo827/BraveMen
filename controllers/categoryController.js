@@ -1,65 +1,68 @@
-const catModel = require("../models/categoryModel")
+const catModel = require("../models/categoryModel");
 
-
-
-const AccessCatogery = async (req,res)=>{
-    const err=req.query.err
-    const msg=req.query.msg
-    try {
-     const Categories= await catModel.find({isActvie:true})
-     console.log("Categories>>>>>",Categories);
-        if(Categories){
-
-          res.render("categories",{ succmsg: '', errmsg: msg ,isAuthenticted:true,category:Categories })
-        }else{
-          res.render("categories",{ succmsg: '', errmsg: msg ,isAuthenticted:false,category:Categories })
-        }
-      } 
-      catch (error) {
-        console.log(error);
-      }
-
-
-}
-
-
-const deleteCategory = async (req,res)=>{
-
-
-    const catName = req.body.CategoryName
-    console.log("Catname====>>>",catName);
-    const category= await catModel.findById(catName)
-
-    if(category){
-        console.log("categoryNAme>>>>>",category);
-        category.isActvie= false
-        await category.save()
-        try {
-            return res.json({ success: true, isAuthenticted: true,category:category });
-    
-          } catch (error) {
-            console.log(error);
-          }
+const AccessCatogery = async (req, res) => {
+  const err = req.query.err;
+  const msg = req.query.msg;
+  try {
+    const Categories = await catModel.find({ isActvie: true });
+    console.log("Categories>>>>>", Categories);
+    if (Categories) {
+      res.render("categories", {
+        succmsg: "",
+        errmsg: msg,
+        isAuthenticted: true,
+        category: Categories,
+      });
+    } else {
+      res.render("categories", {
+        succmsg: "",
+        errmsg: msg,
+        isAuthenticted: false,
+        category: Categories,
+      });
     }
-}
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const deleteCategory = async (req, res) => {
+  const catName = req.body.CategoryName;
+  console.log("Catname====>>>", catName);
+  const category = await catModel.findById(catName);
+
+  if (category) {
+    console.log("categoryNAme>>>>>", category);
+    category.isActvie = false;
+    await category.save();
+    try {
+      return res.json({
+        success: true,
+        isAuthenticted: true,
+        category: category,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+};
 const getCategoryDetails = async (req, res) => {
   const categoryId = req.query.categoryId;
 
   try {
-      const category = await catModel.findById(categoryId);
-      console.log(category)
+    const category = await catModel.findById(categoryId);
+    console.log(category);
 
-      if (category) {
-          res.json({ success: true, category: category });
-      } else {
-          res.status(404).json({ success: false, message: 'Category not found' });
-      }
+    if (category) {
+      res.json({ success: true, category: category });
+    } else {
+      res.status(404).json({ success: false, message: "Category not found" });
+    }
   } catch (error) {
-      console.error(error);
-      res.status(500).json({ success: false, message: 'Internal server error' });
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-
 
 const updateCategory = async (req, res) => {
   console.log("updating Category");
@@ -69,18 +72,27 @@ const updateCategory = async (req, res) => {
 
   try {
     const checkdata = await catModel.findById(categoryId);
-    const existingCategories = await catModel.find({}, { CategoryName: 1, _id: 0 });
+    const existingCategories = await catModel.find(
+      {},
+      { CategoryName: 1, _id: 0 }
+    );
 
-    const isNameAlreadyExists = existingCategories.some(category => category.CategoryName === newCategoryName);
+    const isNameAlreadyExists = existingCategories.some(
+      (category) => category.CategoryName === newCategoryName
+    );
 
     if (isNameAlreadyExists) {
       console.log("This name already exists in category");
-      return res.redirect("/admin/category?err=true&msg=This name already exists in category");
+      return res.redirect(
+        "/admin/category?err=true&msg=This name already exists in category"
+      );
     }
 
     if (checkdata.CategoryName === newCategoryName) {
       console.log("You Can't Use Same Name");
-      return res.redirect("/admin/category?err=true&msg=You Can't Use Same Name");
+      return res.redirect(
+        "/admin/category?err=true&msg=You Can't Use Same Name"
+      );
     } else {
       const updatedCategory = await catModel.findByIdAndUpdate(
         categoryId,
@@ -103,51 +115,37 @@ const updateCategory = async (req, res) => {
   }
 };
 
+const postCategory = async (req, res) => {
+  console.log("posting Category");
 
+  try {
+    const { CategoryName, Description } = req.body;
 
-const postCategory = async (req,res)=>{
-console.log("posting Category");
-
-    try {
-     const {CategoryName,Description}=req.body
-
-    const Categories= await catModel.findOne({CategoryName:CategoryName})
-      if(Categories){
-
-        console.log("This Name is already Exist!!");
+    const Categories = await catModel.findOne({ CategoryName: CategoryName });
+    if (Categories) {
+      console.log("This Name is already Exist!!");
       res.redirect("/admin/category?err=true&msg=This Name is already Exist!!");
-        
-      }else{
-        const category= new catModel({
-            CategoryName:CategoryName,
-            Description:Description
-        });
-        if(category){
-           await category.save()
-           console.log("Category Added Succefully");
-           console.log("category======>>>",category);
-           res.redirect("/admin/category")
-        }
+    } else {
+      const category = new catModel({
+        CategoryName: CategoryName,
+        Description: Description,
+      });
+      if (category) {
+        await category.save();
+        console.log("Category Added Succefully");
+        console.log("category======>>>", category);
+        res.redirect("/admin/category");
       }
-        
-    } catch (error) {
-        console.log(error);
     }
-}
+  } catch (error) {
+    console.log(error);
+  }
+};
 
-
-
-
-
-
-
-
-
-
-module.exports={
-    AccessCatogery,
-    postCategory,
-    deleteCategory,
-    updateCategory,
-    getCategoryDetails,
-}
+module.exports = {
+  AccessCatogery,
+  postCategory,
+  deleteCategory,
+  updateCategory,
+  getCategoryDetails,
+};

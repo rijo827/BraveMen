@@ -70,6 +70,15 @@ const productSchema = new mongoose.Schema({
       taxRate:{
         type:Number,
         required:true
+      },
+      isDeleted :{
+        type:Boolean,
+        default:false
+      },
+      isActive:{
+
+        type:Boolean,
+        default:false
       }
 
 })

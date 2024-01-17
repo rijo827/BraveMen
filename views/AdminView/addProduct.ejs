@@ -1,6 +1,6 @@
 <%-include("../partials/AdminAsideandHeader")-%>
 <section class="content-main">
-  <form action="/admin/addproduct" method="post" id="postform" enctype="multipart/form-data">
+  <form action="/admin/addproduct" method="post" id="postform" enctype="multipart/form-data" onsubmit="return validateProductForm()">
     <div class="row">
       <div class="col-9">
         <div class="content-header">
@@ -20,27 +20,38 @@
           <div class="card-header">
             <h4>Basic</h4>
           </div>
+          <style>
+            .err{
+              color: red;
+            }
+          </style>
           <div class="card-body">
             <!-- Product Name -->
             <div class="mb-4">
               <label for="product_name" class="form-label">Product Name</label>
               <input
+              value="Dhgjh"
                 type="text"
                 placeholder="Type here"
                 class="form-control"
                 id="product_name"
                 name="productName"
               />
+            <span id="productNameError" class="err"></span>
+
             </div>
             <!-- Full description -->
             <div class="mb-4">
               <label class="form-label">Full description</label>
               <textarea
-                placeholder="Type here"
+              placeholder="Type here"
+                id="product_description"
                 class="form-control"
                 rows="4"
                 name="Description"
-              ></textarea>
+              >DSFYIUOOIYUTYRTETSRTYU</textarea>
+            <span id="productDescriptionError" class="err"></span>
+
             </div>
             <!-- Regular Price and Sale Price -->
             <div class="row">
@@ -48,23 +59,28 @@
                 <div class="mb-4">
                   <label class="form-label">Regular Price</label>
                     <input
+                    value="3456"
                       placeholder="$"
                       type="text"
+                      id="regularPrice"
                       class="form-control"
                       name="regularPrice"
                     />
-                  
+                  <span id="regularPriceError" class="err"></span>
                 </div>
               </div>
               <div class="col-lg-4">
                 <div class="mb-4">
                   <label class="form-label">Sale Price</label>
                   <input
+                  value="3456"
                     placeholder="$"
                     type="text"
+                    id="sale_price"
                     class="form-control"
                     name="salePrice"
                   />
+                  <span id="salePriceError" class="err"></span>
                 </div>
               </div>
             </div>
@@ -75,63 +91,79 @@
                 <div class="mb-4">
                   <label class="form-label">Brand</label>
                   <input
+                  value="DSDC"
                     placeholder=""
+                    id="product_brand"
                     type="text"
                     class="form-control"
                     name="brand"
                   />
+                  <span id="brandError" class="err"></span>
                 </div>
               </div>
               <div class="col-lg-4">
-                <label class="form-label">Size</label>
-                <select class="form-select" name="size">
-                  <option>S</option>
-                  <option>M</option>
-                  <option>L</option>
-                  <option>XL</option>
-                  <option>XXL</option>
-                  <option>XXXL</option>
+                <label class="form-label" >Size</label>
+                <select class="form-select" name="size" id="product_size" >
+                  <option value="Size">Size</option>
+                  <option selected value="S">S</option>
+                  <option value="M">M</option>
+                  <option value="L">L</option>
+                  <option value="XL">XL</option>
+                  <option value="XXL">XXL</option>
+                  <option value="XXL">XXXL</option>
                 </select>
+                <span id="sizeError" class="err"></span>
               </div>
               <div class="col-lg-4">
                 <div class="mb-4">
                   <label class="form-label">Stock</label>
                   <input
+                  value="234567"
                     placeholder=""
                     type="text"
                     class="form-control"
+                    id="product_stock"
                     name="stock"
                   />
+                  <span id="stockError" class="err"></span>
                 </div>
               </div>
               <div class="col-lg-4">
                 <div class="mb-4">
                   <label class="form-label">Color</label>
                   <input
+                  value="Dfghj"
                     placeholder=""
                     type="text"
                     class="form-control"
+                    id="product_color"
                     name="color"
                   />
+                  <span id="colorError" class="err"></span>
                 </div>
               </div>
               <div class="col-lg-4">
                 <div class="mb-4">
                   <label class="form-label">Material</label>
                   <input
+                  value="SDFGH"
                     placeholder=""
                     type="text"
                     class="form-control"
+                    id="product_material"
                     name="Material"
                   />
+                  <span id="materialError" class="err"></span>
                 </div>
               </div>
               <div class="col-lg-4">
                 <label class="form-label">Type</label>
-                <select class="form-select" name="type">
-                  <option>Special</option>
-                  <option>Party</option>
+                <select class="form-select" name="type" id="product_type">
+                  <option value="Type">Type</option>
+                  <option selected value="Special">Special</option>
+                  <option value="Party">Party</option>
                 </select>
+                <span id="typeError" class="err"></span>
               </div>
             </div>
             <!-- Shipping Fees and Tax Rate -->
@@ -144,23 +176,27 @@
                   >Shipping fees</label
                 >
                 <input
+                value="43"
                   type="text"
                   placeholder="$"
                   class="form-control"
-                  id="product_name"
+                  id="product_shippingFees"
                   name="shippingFees"
                 />
+                <span id="shippingFeesError" class="err"></span>
               </div>
               <div class="col-lg-4">
                 <div class="mb-4">
                   <label class="form-label">Tax rate</label>
                   <input
+                  value="43"
                     type="text"
                     placeholder="%"
                     class="form-control"
-                    id="product_name"
+                    id="product_taxRate"
                     name="taxRate"
                   />
+                  <span id="taxRateError" class="err"></span>
                 </div>
               </div>
             </div>
@@ -176,8 +212,9 @@
           <div class="card-body">
             <div class="input-upload">
               <img src="/AdminAssets/imgs/theme/upload.svg" alt="" />
-              <input class="form-control" type="file" name="images" multiple/>
+              <input class="form-control" type="file" name="images" multiple id="product_images"/>
             </div>
+            <span id="imagesError" class="err"></span>
           </div>
         </div>
         <!-- card end// -->
@@ -189,11 +226,13 @@
             <div class="row gx-2">
               <div class="col-sm-12 mb-1">
                 <label class="form-label">Category</label>
-                <select class="form-select" name="category">
+                <select class="form-select" name="category" id="product_cat">
+                  <option value="Category">Category</option>
                   <% category.forEach(function(item) { %>
                   <option value="<%=item._id%>"><%=item.CategoryName%></option>
                   <% }); %>
                 </select>
+                <span id="categoryError" class="err"></span>
               </div>
             </div>
             <!-- row.// -->
@@ -213,4 +252,5 @@
       $(this).unbind("submit").submit(); // Actual form submission
     });
   }
+  
 </script>

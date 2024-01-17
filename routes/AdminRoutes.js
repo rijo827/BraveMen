@@ -33,8 +33,9 @@ adminroute.get('/getCategoryDetails',adminMiddleware.islogin, categoryController
 
 
 
-adminroute.get('/addproduct',adminMiddleware.islogin,productController.loadProduct);
+adminroute.get('/addproduct',adminMiddleware.islogin,productController.loadAddProduct);
 adminroute.post('/addproduct',upload.array('images',5),productController.addProduct);
+adminroute.post('/deleteproduct',productController.deleteOneProduct);
 
 
 
