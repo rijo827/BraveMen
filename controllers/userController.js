@@ -1,8 +1,8 @@
 const userModel = require("../models/userModel");
 const nodemailer = require("nodemailer");
 const randomstring = require("randomstring");
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 // let generatedOtp = "";
 const transporter = nodemailer.createTransport({
@@ -31,13 +31,13 @@ const SendOtp = async (req, res) => {
   // Save OTP to storage`
   otpStorage[Email] = otp;
   setTimeout(() => {
-    console.log("otpStorage   ===>>>  ",otpStorage);
+    console.log("otpStorage   ===>>>  ", otpStorage);
     console.log("Otp expired");
-    console.log("expired is otpStorage[Email]  ===>>>   ",otpStorage[Email]);
+    console.log("expired is otpStorage[Email]  ===>>>   ", otpStorage[Email]);
     delete otpStorage[Email];
-    console.log("otpStorage   ===>>>  ",otpStorage);
+    console.log("otpStorage   ===>>>  ", otpStorage);
   }, 20 * 1000);
-// 5 * 60 * 1000
+  // 5 * 60 * 1000
   console.log("otpStorage[Email]  >>>>>>>", otpStorage[Email]);
   console.log("otpStorage  >>>>>>>", otpStorage);
 
@@ -80,8 +80,6 @@ const verifiOtp = async (Email, otp, req, res) => {
   }
 };
 
-
-
 const updatePassword = async (req, res) => {
   try {
     console.log("Updated Password");
@@ -97,13 +95,13 @@ const updatePassword = async (req, res) => {
 
       if (isPasswordMatch) {
         console.log("You can't use the same password");
-        res.redirect("/forgotPassword?err=true&msg=You can't use the same password");
+        res.redirect(
+          "/forgotPassword?err=true&msg=You can't use the same password"
+        );
       } else {
-        
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-        
-        
+
         user.Password = hashedPassword;
         await user.save();
 
@@ -111,7 +109,6 @@ const updatePassword = async (req, res) => {
         res.redirect("/login");
       }
     } else {
-      
       console.log("User not found ");
       res.redirect("/forgotPassword?err=true&msg=User not found");
     }
@@ -120,32 +117,28 @@ const updatePassword = async (req, res) => {
   }
 };
 
+const forgotPassword = async (req, res) => {
+  const err = req.query.err;
+  const msg = req.query.msg;
 
-const forgotPassword =async (req,res)=>{
-  
-
-  const err=req.query.err
-  const msg=req.query.msg
-
-  if(err){
-    res.render("forgotPassword",  { succmsg: '', errmsg: msg ,isAuthenticted:false })
-
-
-  }else{
-    res.render("forgotPassword",  { succmsg: msg, errmsg:'',isAuthenticted:false })
-
+  if (err) {
+    res.render("forgotPassword", {
+      succmsg: "",
+      errmsg: msg,
+      isAuthenticted: false,
+    });
+  } else {
+    res.render("forgotPassword", {
+      succmsg: msg,
+      errmsg: "",
+      isAuthenticted: false,
+    });
   }
-
-
-}
-
-
-
+};
 
 const insertUser = async (req, res) => {
   try {
-    
-    const {Firstname,Lastname,Phone,Password,Email}=req.body
+    const { Firstname, Lastname, Phone, Password, Email } = req.body;
     const checkdata = await userModel.findOne({ Email: Email });
     if (checkdata) {
       console.log("checkdata   ===>>>  ", checkdata);
@@ -158,44 +151,42 @@ const insertUser = async (req, res) => {
         Password: Password,
         Phone: Phone,
       });
-    
+
       const isVerifiedPromise = verifiOtp(Email, req.body.otp);
-      
+
       isVerifiedPromise.then((isVerified) => {
         if (isVerified) {
-            saveUser()
-    
+          saveUser();
         } else {
           res.redirect("/signup?err=true&msg=Invalid Otp");
-        //   Swal.fire({
-        //     icon: 'error',
-        //     title: 'Invalid OTP',
-        //     text: 'Please enter a valid OTP.',
-        //   });
+          //   Swal.fire({
+          //     icon: 'error',
+          //     title: 'Invalid OTP',
+          //     text: 'Please enter a valid OTP.',
+          //   });
         }
-      
-        console.log("USer====>",User);
+
+        console.log("USer====>", User);
         console.log(isVerified);
       });
 
-
-      const saveUser =  ( async ()=>{
-       await User.save();
-       console.log("password>>>>>>>",User.Password);
+      const saveUser = async () => {
+        await User.save();
+        console.log("password>>>>>>>", User.Password);
         // req.session.userID = User._id;
-        let payload={UserID: User._id}
-        const token = jwt.sign(payload, process.env.SECRATE_KEY, { expiresIn: '1d' });
-        console.log(" payload=====>>>",payload);
-          console.log("token======>>>>",token);
-          res.cookie('jwttoken', token, { httpOnly: true });
-          res.cookie('userID', payload.UserID, { httpOnly: true });
+        let payload = { UserID: User._id };
+        const token = jwt.sign(payload, process.env.SECRATE_KEY, {
+          expiresIn: "1d",
+        });
+        console.log(" payload=====>>>", payload);
+        console.log("token======>>>>", token);
+        res.cookie("jwttoken", token, { httpOnly: true });
+        res.cookie("userID", payload.UserID, { httpOnly: true });
         console.log(" req.session.userID  ===>>", req.session.userID);
         console.log("Account created successfully");
         res.redirect("/");
-        User.jwt_token=token;
-
-      })
-    
+        User.jwt_token = token;
+      };
     }
   } catch (error) {}
 };
@@ -205,30 +196,36 @@ const loadRegister = async (req, res) => {
     const err = req.query.err;
     const msg = req.query.msg;
     if (err) {
-      res.render("register", { errmsg: msg, succmsg:'' ,isAuthenticted:false});
+      res.render("register", {
+        errmsg: msg,
+        succmsg: "",
+        isAuthenticted: false,
+      });
     } else {
-      res.render("register", { succmsg: msg, errmsg:'',isAuthenticted:false });
+      res.render("register", {
+        succmsg: msg,
+        errmsg: "",
+        isAuthenticted: false,
+      });
     }
   } catch (error) {
     console.log(error);
   }
 };
 
-
-const loadLogin = async (req,res)=>{
-  
+const loadLogin = async (req, res) => {
   try {
     const err = req.query.err;
     const msg = req.query.msg;
     if (err) {
-      res.render("login", { errmsg: msg, succmsg:'' ,isAuthenticted:false});
+      res.render("login", { errmsg: msg, succmsg: "", isAuthenticted: false });
     } else {
-      res.render("login", { succmsg: msg, errmsg:'',isAuthenticted:false });
+      res.render("login", { succmsg: msg, errmsg: "", isAuthenticted: false });
     }
   } catch (error) {
     console.log(error);
   }
-}
+};
 
 const loggingUser = async (req, res) => {
   try {
@@ -249,17 +246,19 @@ const loggingUser = async (req, res) => {
           let payload = { UserID: User._id };
           console.log("payload ====>>>", payload);
 
-          const token = jwt.sign(payload, process.env.SECRATE_KEY, { expiresIn: '1d' });
+          const token = jwt.sign(payload, process.env.SECRATE_KEY, {
+            expiresIn: "1d",
+          });
 
           if (token) {
             User.jwt_token = token;
             User.save()
               .then(() => {
                 console.log("token======>>>>", token);
-                res.cookie('jwttoken', token, { httpOnly: true });
-                res.cookie('userID', payload.UserID, { httpOnly: true });
+                res.cookie("jwttoken", token, { httpOnly: true });
+                res.cookie("userID", payload.UserID, { httpOnly: true });
                 console.log("Yes Its U");
-                res.redirect('/');
+                res.redirect("/");
               })
               .catch((err) => {
                 res.redirect("/login?err=true&msg=Something went wrong!");
@@ -282,49 +281,41 @@ const loggingUser = async (req, res) => {
   }
 };
 
-
-const loadhome = async(req,res)=>{
+const loadhome = async (req, res) => {
   // let user = req.session.userID;
-  let user = req.cookies?.jwttoken
-  let userID=req.cookies?.userID
-  console.log("userId >>>>>>",userID);
-  if(user && userID){
-
-   let thisUser = await userModel.findById(userID);
-   console.log("User name>>>>", thisUser.Firstname)
-    res.render("home",{isAuthenticted: true})
-  }else{
-    res.render("home",{isAuthenticted: false})
+  let user = req.cookies?.jwttoken;
+  let userID = req.cookies?.userID;
+  console.log("userId >>>>>>", userID);
+  if (user && userID) {
+    let thisUser = await userModel.findById(userID);
+    console.log("User name>>>>", thisUser.Firstname);
+    res.render("home", { isAuthenticted: true });
+  } else {
+    res.render("home", { isAuthenticted: false });
   }
-}
+};
 
-const userAccountGet = async(req,res)=>{
-
+const userAccountGet = async (req, res) => {
   try {
     let token = req.cookies.jwttoken;
-    let userID=req.cookies.userID
-  if(token && userID){
-    res.render("userAccount",{isAuthenticted:true})
-    // res.render("home",{isAuthenticted: true})
-  }else{
-    res.redirect("/login?err=true&msg=Login first to access it");
-  }
-    
-  } catch (error) {
-    
-  }
-}
- const loggoutUser = async (req,res)=>{
+    let userID = req.cookies.userID;
+    if (token && userID) {
+      res.render("userAccount", { isAuthenticted: true });
+      // res.render("home",{isAuthenticted: true})
+    } else {
+      res.redirect("/login?err=true&msg=Login first to access it");
+    }
+  } catch (error) {}
+};
+const loggoutUser = async (req, res) => {
+  let user = req.cookies?.jwttoken;
 
-  let user = req.cookies?.jwttoken
-
-  if(user){
-    res.clearCookie('jwttoken');
+  if (user) {
+    res.clearCookie("jwttoken");
     console.log("its cleared");
-    res.redirect('/')
+    res.redirect("/");
   }
-
- }
+};
 
 module.exports = {
   insertUser,

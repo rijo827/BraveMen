@@ -3,8 +3,10 @@ const categoryModel = require("../models/categoryModel");
 
 const getAllProduct = async (req, res) => {
   try {
-    let products = await ProductModel.find({}).populate("category");
-    let category = await categoryModel.find();
+    let products = await ProductModel.find({ isDeleted: false }).populate(
+      "category"
+    );
+    let category = await categoryModel.find({ isActvie: true });
     console.log("products.....", products);
     console.log("category.....", category);
     if (products) {
@@ -21,6 +23,107 @@ const getAllProduct = async (req, res) => {
   } catch (e) {
     console.log(e);
   }
+};
+
+const updateProduct = async (req, res) => {
+  const {
+    newProductName,
+    newDescription,
+    newregularPrice,
+    newsalePrice,
+    newbrand,
+    newsize,
+    newstock,
+    newcolor,
+    newMaterial,
+    newtype,
+    newshippingFees,
+    newtaxRate,
+    newcategory,
+  } = req.body;
+
+  const newimages = req.files.map((file) => file.filename);
+  console.log("newimages=====>>.", newimages);
+
+  try {
+    const productID = req.params.product_id;
+    console.log("productID====>>>", productID);
+
+    // Find the existing product by ID
+    const existingProduct = await ProductModel.findById(productID);
+
+    if (!existingProduct) {
+      return res.status(404).json({ error: "Product not found." });
+    }
+
+    // Update the product properties
+    existingProduct.productName = newProductName;
+    existingProduct.description = newDescription;
+    existingProduct.regularPrice = newregularPrice;
+    existingProduct.salePrice = newsalePrice;
+    existingProduct.brand = newbrand;
+    existingProduct.size = newsize;
+    existingProduct.stock = newstock;
+    existingProduct.color = newcolor;
+    existingProduct.Material = newMaterial;
+    existingProduct.type = newtype;
+    existingProduct.shippingFees = newshippingFees;
+    existingProduct.taxRate = newtaxRate;
+    existingProduct.category = newcategory;
+    existingProduct.Image = newimages;
+
+    if (existingProduct) {
+      await existingProduct.save();
+      console.log("Updated successfully");
+      res.redirect("/admin/all_products");
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: "Internal server error." });
+  }
+};
+
+const showUpdatedProduct = async (req, res) => {
+  const productID = req.params.product_id;
+  console.log("productID====>>>", productID);
+  try {
+    const product = await ProductModel.findOne({ _id: productID });
+    console.log("product=====>>>", product);
+
+    if (product) {
+      const categoryDetails = await categoryModel.find({ isActvie: true });
+      console.log("Category", categoryDetails);
+      res.render("updateProduct", {
+        isAuthenticted: true,
+        product: product,
+        category: categoryDetails,
+      });
+    } else {
+      console.log("Not logged");
+      res.render("updateProduct", { isAuthenticted: false });
+    }
+  } catch (error) {
+    console.log("Error");
+    console.log(error);
+  }
+};
+
+const deleteimage = async (req, res) => {
+  const image = req.body.imageName;
+  console.log("image====>>", image);
+  try {
+    const Product = await ProductModel.findOne({ Image: image });
+    console.log("Product ====>>", Product);
+    const img = Product.Image;
+    console.log("img ====>>", img);
+    const index = img.indexOf(img);
+
+    img.splice(index, 1);
+
+    console.log("img after delete====>>", img);
+
+    Product.save();
+  } catch (error) {}
 };
 
 const loadAddProduct = async (req, res) => {
@@ -93,25 +196,34 @@ const addProduct = async (req, res) => {
   }
 };
 
-const deleteOneProduct = async (req,res)=>{
- console.log("deleteingg......");
-  const productname = req.body.productName
+const deleteOneProduct = async (req, res) => {
+  console.log("deleteingg......");
+  const productname = req.body.productName;
 
-  const product= await ProductModel.findById(productname)
+  const product = await ProductModel.findById(productname);
 
-  if(product){
+  if (product) {
     console.log("productID>>>>>", product);
-       product.isDeleted=true
-      await product.save()
-      
+    product.isDeleted = true;
+    await product.save();
+    try {
+      return res.json({
+        success: true,
+        isAuthenticted: true,
+        product: product,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
-}
-
-
+};
 
 module.exports = {
   loadAddProduct,
   addProduct,
   getAllProduct,
   deleteOneProduct,
+  updateProduct,
+  showUpdatedProduct,
+  deleteimage,
 };

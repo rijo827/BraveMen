@@ -1,0 +1,302 @@
+<%-include("../partials/AdminAsideandHeader")-%>
+<section class="content-main">
+  <form action="/admin/updateproduct/<%= product._id %>" method="post" id="postform" enctype="multipart/form-data" onsubmit="return validateProductForm()">
+    <div class="row">
+      <div class="col-9">
+        <div class="content-header">
+          <h2 class="content-title"> Update Product</h2>
+          <div>
+            <button
+              class="btn btn-md rounded font-sm hover-up"
+              type="submit" 
+            >
+              Publish
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4>Basic</h4>
+          </div>
+          <style>
+            .err{
+              color: red;
+            }
+          </style>
+          <div class="card-body">
+            <!-- Product Name -->
+            <div class="mb-4">
+              <label for="product_name" class="form-label">Product Name</label>
+              <input
+              value="Dhgjh"
+                type="text"
+                placeholder="Type here"
+                class="form-control"
+                id="product_name"
+                name="newProductName"
+              />
+            <span id="productNameError" class="err"></span>
+
+            </div>
+            <!-- Full description -->
+            <div class="mb-4">
+              <label class="form-label">Full description</label>
+              <textarea
+              placeholder="Type here"
+                id="product_description"
+                class="form-control"
+                rows="4"
+                name="newDescription"
+              >DSFYIUOOIYUTYRTETSRTYU</textarea>
+            <span id="productDescriptionError" class="err"></span>
+
+            </div>
+            <!-- Regular Price and Sale Price -->
+            <div class="row">
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Regular Price</label>
+                    <input
+                    value="3456"
+                      placeholder="$"
+                      type="text"
+                      id="regularPrice"
+                      class="form-control"
+                      name="newregularPrice"
+                    />
+                  <span id="regularPriceError" class="err"></span>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Sale Price</label>
+                  <input
+                  value="3456"
+                    placeholder="$"
+                    type="text"
+                    id="sale_price"
+                    class="form-control"
+                    name="newsalePrice"
+                  />
+                  <span id="salePriceError" class="err"></span>
+                </div>
+              </div>
+            </div>
+            <!-- Size, Brand, Stock, Color, Material, Type -->
+            <div class="row">
+              
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Brand</label>
+                  <input
+                  value="DSDC"
+                    placeholder=""
+                    id="product_brand"
+                    type="text"
+                    class="form-control"
+                    name="newbrand"
+                  />
+                  <span id="brandError" class="err"></span>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <label class="form-label" >Size</label>
+                <select class="form-select" name="newsize" id="product_size" >
+                  <option value="Size">Size</option>
+                  <option selected value="S">S</option>
+                  <option value="M">M</option>
+                  <option value="L">L</option>
+                  <option value="XL">XL</option>
+                  <option value="XXL">XXL</option>
+                  <option value="XXL">XXXL</option>
+                </select>
+                <span id="sizeError" class="err"></span>
+              </div>
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Stock</label>
+                  <input
+                  value="234567"
+                    placeholder=""
+                    type="text"
+                    class="form-control"
+                    id="product_stock"
+                    name="newstock"
+                  />
+                  <span id="stockError" class="err"></span>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Color</label>
+                  <input
+                  value="Dfghj"
+                    placeholder=""
+                    type="text"
+                    class="form-control"
+                    id="product_color"
+                    name="newcolor"
+                  />
+                  <span id="colorError" class="err"></span>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Material</label>
+                  <input
+                  value="SDFGH"
+                    placeholder=""
+                    type="text"
+                    class="form-control"
+                    id="product_material"
+                    name="newMaterial"
+                  />
+                  <span id="materialError" class="err"></span>
+                </div>
+              </div>
+              <div class="col-lg-4">
+                <label class="form-label">Type</label>
+                <select class="form-select" name="newtype" id="product_type">
+                  <option value="Type">Type</option>
+                  <option  value="Special">Special</option>
+                  <option value="Party">Party</option>
+                </select>
+                <span id="typeError" class="err"></span>
+              </div>
+            </div>
+            <!-- Shipping Fees and Tax Rate -->
+            <div class="card-header">
+              <h4>Shipping</h4>
+            </div>
+            <div class="row">
+              <div class="col-lg-4">
+                <label for="product_name" class="form-label"
+                  >Shipping fees</label
+                >
+                <input
+                value=" "
+                  type="text"
+                  placeholder="$"
+                  class="form-control"
+                  id="product_shippingFees"
+                  name="newshippingFees"
+                />
+                <span id="shippingFeesError" class="err"></span>
+              </div>
+              <div class="col-lg-4">
+                <div class="mb-4">
+                  <label class="form-label">Tax rate</label>
+                  <input
+                  value=" "
+                    type="text"
+                    placeholder="%"
+                    class="form-control"
+                    id="product_taxRate"
+                    name="newtaxRate"
+                  />
+                  <span id="taxRateError" class="err"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- card end// -->
+      </div>
+      <div class="col-lg-3">
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4>Media</h4>
+          </div>
+         <!-- Inside your updateProduct EJS template -->
+         <style>
+          .image-container {
+            position: relative;
+            display: inline-block;
+            margin-right: 5px; /* Adjust as needed for spacing between images */
+          }
+        
+          .close-button {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background-color: red;
+            border: none;
+            color: #fff; /* Set the color of the close button */
+            font-size: 20px;
+            cursor: pointer;
+          }
+        </style>
+        
+         <div class="card-body">
+          <div class="input-upload">
+            <% if (product.Image && product.Image.length > 0) { %>
+              <% product.Image.forEach(image => { %>
+                <div class="image-container">
+                  <img src="/imgs/Gallery/<%= image %>" alt="Product Image" />
+                  <button class="close-button" type="button" onclick="deleteImage('<%= image %>')">&times;</button>
+                </div>
+              <% }); %>
+            <% } else { %>
+              <img src="/AdminAssets/imgs/theme/upload.svg" alt="Placeholder" />
+            <% } %>
+            <input class="form-control" type="file" name="newimages" multiple id="product_images"/>
+          </div>
+          <span id="imagesError" class="err"></span>
+        </div>
+        
+
+        </div>
+        <!-- card end// -->
+        <div class="card mb-4">
+          <div class="card-header">
+            <h4>Categories</h4>
+          </div>
+          <div class="card-body">
+            <div class="row gx-2">
+              <div class="col-sm-12 mb-1">
+                <label class="form-label">Category</label>
+                <select class="form-select" name="newcategory" id="product_cat">
+                  <option value="Category">Category</option>
+                  <% category.forEach(function(item) { %>
+                  <option value="<%=item._id%>"><%=item.CategoryName%></option>
+                  <% }); %>
+                </select>
+                <span id="categoryError" class="err"></span>
+              </div>
+            </div>
+            <!-- row.// -->
+          </div>
+        </div>
+        <!-- card end// -->
+      </div>
+    </div>
+  </form>
+</section>
+<%-include("../partials/AdminFooter")-%>
+<script>
+  function submitForm() {
+    $("#postform").submit(function (event) {
+      event.preventDefault(); // Prevent the default form submission
+      // Additional logic or validation can be added here if needed
+      $(this).unbind("submit").submit(); // Actual form submission
+    });
+  }
+  function deleteImage(imageFilename) {
+        // Send an AJAX request to delete the image
+        $.ajax({
+            url: '/admin/deleteimage',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ imageName: imageFilename }),
+            success: function(response) {
+                console.log(response);
+                // Optionally, update the UI to reflect the image deletion
+            },
+            error: function(error) {
+                console.error(error);
+            }
+        });
+    }
+</script>

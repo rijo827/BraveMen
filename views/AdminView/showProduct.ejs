@@ -38,9 +38,9 @@
     </header>
     <!-- card-header end// -->
     <div class="card-body">
-      <article class="itemlist">
+      <article class="itemlist" >
         <% products.forEach(function(product) { %>
-        <div class="row align-items-center">
+        <div class="row align-items-center" id="product_<%= product._id %>">
           <div class="col-lg-4 col-sm-4 col-8 flex-grow-1 col-name">
             <a class="itemside" href="#">
               <div class="left">
@@ -83,10 +83,11 @@
           <div
             class="col-lg-3 col-sm-3 col-5 col-action text-end d-flex justify-content-evenly"
           >
-            <a href="#" class="btn btn-sm font-sm rounded btn-brand">
-              <i class="material-icons md-edit"></i> Edit
-            </a>
-            <a href="#" class="btn btn-sm font-sm btn-light rounded">
+          <a href="/admin/updateproduct/<%= product._id %>" class="btn btn-sm font-sm rounded btn-brand">
+            <i class="material-icons md-edit"></i> Edit
+          </a>
+          
+            <a class="btn btn-sm font-sm btn-light rounded delete-product" data-product="<%= product._id %>">
               <i class="material-icons md-delete_forever"></i> Delete
             </a>
             <a
@@ -124,3 +125,31 @@
 </section>
 <!-- content-main end// -->
 <%-include("../partials/AdminFooter")-%>
+<script>
+  $(document).ready(function() {
+  $('.delete-product').on('click', function(event) {
+    event.preventDefault();
+console.log("deleteing.......");
+    const productToDelete = $(this).data('product');
+    alert(productToDelete);
+
+    $.ajax({
+      url: '/admin/deleteproduct',
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ productName: productToDelete }),
+      success: function(response) {
+        console.log(response);
+
+        // Assuming you have an element with an ID like "product_" + productToDelete
+        $("#product_" + productToDelete).remove();
+      },
+      error: function(error) {
+        console.error(error);
+      }
+    });
+  });
+});
+
+
+</script>

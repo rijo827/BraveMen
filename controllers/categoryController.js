@@ -72,8 +72,10 @@ const updateCategory = async (req, res) => {
 
   try {
     const checkdata = await catModel.findById(categoryId);
+
+    // Check if the new category name already exists in other categories
     const existingCategories = await catModel.find(
-      {},
+      { _id: { $ne: categoryId } }, // Exclude the current category from the query
       { CategoryName: 1, _id: 0 }
     );
 
@@ -82,18 +84,11 @@ const updateCategory = async (req, res) => {
     );
 
     if (isNameAlreadyExists) {
-      console.log("This name already exists in category");
+      console.log("This name already exists in other categories");
       return res.redirect(
-        "/admin/category?err=true&msg=This name already exists in category"
+        "/admin/category?err=true&msg=This name already exists in other categories"
       );
-    }
-
-    if (checkdata.CategoryName === newCategoryName) {
-      console.log("You Can't Use Same Name");
-      return res.redirect(
-        "/admin/category?err=true&msg=You Can't Use Same Name"
-      );
-    } else {
+    } else if (checkdata.CategoryName === newCategoryName) {
       const updatedCategory = await catModel.findByIdAndUpdate(
         categoryId,
         { CategoryName: newCategoryName, Description: newDescription },
@@ -121,8 +116,13 @@ const postCategory = async (req, res) => {
   try {
     const { CategoryName, Description } = req.body;
 
-    const Categories = await catModel.findOne({ CategoryName: CategoryName });
-    if (Categories) {
+    // Check if the category with the same name already exists (excluding the current one)
+    const existingCategory = await catModel.findOne({
+      CategoryName: CategoryName,
+      _id: { $ne: req.params.id }, // Exclude the current category ID if it's available in the request parameters
+    });
+
+    if (existingCategory) {
       console.log("This Name is already Exist!!");
       res.redirect("/admin/category?err=true&msg=This Name is already Exist!!");
     } else {
@@ -130,15 +130,17 @@ const postCategory = async (req, res) => {
         CategoryName: CategoryName,
         Description: Description,
       });
+
       if (category) {
         await category.save();
-        console.log("Category Added Succefully");
+        console.log("Category Added Successfully");
         console.log("category======>>>", category);
         res.redirect("/admin/category");
       }
     }
   } catch (error) {
     console.log(error);
+    res.redirect("/admin/category?err=true&msg=Something went wrong");
   }
 };
 
