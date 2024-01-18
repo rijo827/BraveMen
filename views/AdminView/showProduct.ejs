@@ -77,7 +77,14 @@
             <span>$<%= product.salePrice %></span>
           </div>
           <div class="col-lg-1 col-sm-1 col-3 col-status">
-            <span class="badge rounded-pill alert-success">Active</span>
+            <% if (product.isActive) { %>
+
+            <span class="badge rounded-pill alert-danger" data_product="<%= product._id %>">Inactive</span>
+            <% } else { %>
+
+            <span class="badge rounded-pill alert-success" data_product="<%= product._id %>">Active</span>
+            <% } %>
+
           </div>
 
           <div
@@ -90,12 +97,14 @@
             <a class="btn btn-sm font-sm btn-light rounded delete-product" data-product="<%= product._id %>">
               <i class="material-icons md-delete_forever"></i> Delete
             </a>
-            <a
-              href="#"
-              class="btn btn-sm font-sm rounded btn-brand btn-block-red"
-            >
-              Block
-            </a>
+            <% if (product.isActive) { %>
+            
+            <a  class="btn btn-sm font-sm rounded btn-brand " dataproduct="<%= product._id %>" onclick="statusUpdate(`<%= product._id %>`)" > Unblock </a>
+            <% } else { %>
+
+            <a   class="btn btn-sm font-sm rounded btn-brand btn-block-red" dataproduct="<%= product._id %>" onclick="statusUpdate(`<%= product._id %>`)" > Block </a>
+            <% } %>
+
           </div>
         </div>
         <!-- row .// -->
@@ -151,5 +160,52 @@ console.log("deleteing.......");
   });
 });
 
+function updateButtonStatus(productID, newStatus) {
+    console.log("updateButtonStatus");
+    const button = document.querySelector(`[dataproduct="${productID}"]`);
+    console.log(`[dataproduct="${productID}"]`);
+
+    if (button) {
+      console.log("button===>>>>",button);
+        button.textContent = newStatus ? 'Unblock' : 'Block';
+
+        button.className = newStatus ? 'btn btn-sm font-sm rounded btn-brand' : 'btn btn-sm font-sm rounded btn-brand btn-block-red';
+    }
+}
+
+
+function updateActiveStatus(productID, newStatus) {
+    console.log("updateActiveStatus");
+    const button = document.querySelector(`[data_product="${productID}"]`);
+    console.log(`[data_product="${productID}"]`);
+
+    if (button) {
+        button.textContent = newStatus ? 'Inactive' : 'Active';
+        button.className = newStatus ? 'badge rounded-pill alert-danger' : 'badge rounded-pill alert-success';
+    }
+}
+
+function statusUpdate(id) {
+    const data = { productID: id };
+
+    fetch('/admin/productstatusUpdate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    })
+    .then(response => response.json())
+    .then(result => {
+        console.log('Status update successful:', result);
+        updateButtonStatus(id, result.product.isActive);
+        updateActiveStatus(id, result.product.isActive);
+
+
+    })
+    .catch(error => {
+        console.error('Error during status update:', error);
+    });
+}
 
 </script>

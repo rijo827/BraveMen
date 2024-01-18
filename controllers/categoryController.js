@@ -88,7 +88,7 @@ const updateCategory = async (req, res) => {
       return res.redirect(
         "/admin/category?err=true&msg=This name already exists in other categories"
       );
-    } else if (checkdata.CategoryName === newCategoryName) {
+    } else if (checkdata.CategoryName === newCategoryName || newCategoryName) {
       const updatedCategory = await catModel.findByIdAndUpdate(
         categoryId,
         { CategoryName: newCategoryName, Description: newDescription },

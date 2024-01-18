@@ -39,6 +39,8 @@ adminroute.post('/deleteproduct',productController.deleteOneProduct);
 adminroute.post('/updateproduct/:product_id',adminMiddleware.islogin,upload.array('newimages',5),productController.updateProduct);
 adminroute.get('/updateproduct/:product_id',adminMiddleware.islogin,productController.showUpdatedProduct)
 adminroute.post('/deleteimage',productController.deleteimage)
+adminroute.post('/productstatusUpdate',productController.productStatusUpdate)
+
 
 
 

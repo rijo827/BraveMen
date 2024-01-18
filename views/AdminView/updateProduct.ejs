@@ -30,7 +30,7 @@
             <div class="mb-4">
               <label for="product_name" class="form-label">Product Name</label>
               <input
-              value="Dhgjh"
+              value="<%= product.productName %>"
                 type="text"
                 placeholder="Type here"
                 class="form-control"
@@ -49,7 +49,7 @@
                 class="form-control"
                 rows="4"
                 name="newDescription"
-              >DSFYIUOOIYUTYRTETSRTYU</textarea>
+              ><%= product.description %></textarea>
             <span id="productDescriptionError" class="err"></span>
 
             </div>
@@ -59,7 +59,7 @@
                 <div class="mb-4">
                   <label class="form-label">Regular Price</label>
                     <input
-                    value="3456"
+                    value="<%= product.regularPrice %>"
                       placeholder="$"
                       type="text"
                       id="regularPrice"
@@ -73,7 +73,7 @@
                 <div class="mb-4">
                   <label class="form-label">Sale Price</label>
                   <input
-                  value="3456"
+                  value="<%= product.salePrice %>"
                     placeholder="$"
                     type="text"
                     id="sale_price"
@@ -91,7 +91,7 @@
                 <div class="mb-4">
                   <label class="form-label">Brand</label>
                   <input
-                  value="DSDC"
+                  value="<%= product.brand %>"
                     placeholder=""
                     id="product_brand"
                     type="text"
@@ -105,12 +105,12 @@
                 <label class="form-label" >Size</label>
                 <select class="form-select" name="newsize" id="product_size" >
                   <option value="Size">Size</option>
-                  <option selected value="S">S</option>
-                  <option value="M">M</option>
-                  <option value="L">L</option>
-                  <option value="XL">XL</option>
-                  <option value="XXL">XXL</option>
-                  <option value="XXL">XXXL</option>
+                  <option <%= product.size == 'S' ? 'selected' : '' %> value="S">S</option>
+                  <option <%= product.size == 'M' ? 'selected' : '' %> value="M">M</option>
+                  <option <%= product.size == 'L' ? 'selected' : '' %> value="L">L</option>
+                  <option <%= product.size == 'XL' ? 'selected' : '' %> value="XL">XL</option>
+                  <option <%= product.size == 'XXL' ? 'selected' : '' %> value="XXL">XXL</option>
+                  <option <%= product.size == 'XXXL' ? 'selected' : '' %> value="XXXL">XXXL</option>
                 </select>
                 <span id="sizeError" class="err"></span>
               </div>
@@ -118,7 +118,7 @@
                 <div class="mb-4">
                   <label class="form-label">Stock</label>
                   <input
-                  value="234567"
+                  value="<%= product.stock %>"
                     placeholder=""
                     type="text"
                     class="form-control"
@@ -132,7 +132,7 @@
                 <div class="mb-4">
                   <label class="form-label">Color</label>
                   <input
-                  value="Dfghj"
+                  value="<%= product.color %>"
                     placeholder=""
                     type="text"
                     class="form-control"
@@ -146,7 +146,7 @@
                 <div class="mb-4">
                   <label class="form-label">Material</label>
                   <input
-                  value="SDFGH"
+                  value="<%= product.Material %>"
                     placeholder=""
                     type="text"
                     class="form-control"
@@ -160,8 +160,8 @@
                 <label class="form-label">Type</label>
                 <select class="form-select" name="newtype" id="product_type">
                   <option value="Type">Type</option>
-                  <option  value="Special">Special</option>
-                  <option value="Party">Party</option>
+                  <option <%= product.type == 'Special' ? 'selected' : '' %> value="Special">Special</option>
+                  <option <%= product.type == 'Party' ? 'selected' : '' %> value="Party">Party</option>
                 </select>
                 <span id="typeError" class="err"></span>
               </div>
@@ -176,7 +176,7 @@
                   >Shipping fees</label
                 >
                 <input
-                value=" "
+                value=" <%= product.shippingFees %>"
                   type="text"
                   placeholder="$"
                   class="form-control"
@@ -189,7 +189,7 @@
                 <div class="mb-4">
                   <label class="form-label">Tax rate</label>
                   <input
-                  value=" "
+                  value=" <%= product.taxRate %>"
                     type="text"
                     placeholder="%"
                     class="form-control"

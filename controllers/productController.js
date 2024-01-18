@@ -25,6 +25,27 @@ const getAllProduct = async (req, res) => {
   }
 };
 
+
+const productStatusUpdate = async (req, res) => {
+  console.log("statusUpdate ====>>>");
+  const productID = req.body.productID;
+  console.log(productID);
+  const product = await ProductModel.findOne({ _id: productID });
+  console.log("product>>>>>", product);
+  product.isActive = !product.isActive;
+  await product.save();
+  try {
+    return res.json({ success: true, isAuthenticted: true, product: product });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+
+
+
+
 const updateProduct = async (req, res) => {
   const {
     newProductName,
@@ -226,4 +247,5 @@ module.exports = {
   updateProduct,
   showUpdatedProduct,
   deleteimage,
+  productStatusUpdate,
 };
