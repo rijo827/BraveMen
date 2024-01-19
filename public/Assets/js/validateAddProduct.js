@@ -80,73 +80,86 @@ function validateProductForm() {
   }
 
   // Function to validate regular price
-  function validateRegularPrice() {
-    const regularPriceValue = regularPrice.value.trim();
+  // Function to validate regular price
+// Function to validate regular price
+function validateRegularPrice() {
+  const regularPriceValue = regularPrice.value.trim();
+  const salePriceValue = salePrice.value.trim();
 
-    if (regularPriceValue === "") {
+  if (regularPriceValue === "") {
       regularPriceError.innerHTML = "Regular price cannot be empty";
       clearErrorWithDelay(regularPriceError);
       isValid = false;
-    } else {
+  } else {
       // Check if the value is a valid number
       const isNumeric = /^\d+$/.test(regularPriceValue);
 
       if (!isNumeric) {
-        regularPriceError.innerHTML = "Regular price must be a number";
-        clearErrorWithDelay(regularPriceError);
-        isValid = false;
-      } else {
-        // Check if the price is greater than or equal to 1
-        const numericValue = parseInt(regularPriceValue, 10);
-        if (numericValue) {
-          if (!priceRegex.test(numericValue)) {
-            regularPriceError.innerHTML = "This is not in correct Format";
-            clearErrorWithDelay(regularPriceError);
-            isValid = false;
-          }
-        }
-        if (numericValue < 1) {
-          regularPriceError.innerHTML =
-            "Regular price must be greater than or equal to 1";
+          regularPriceError.innerHTML = "Regular price must be a number";
           clearErrorWithDelay(regularPriceError);
           isValid = false;
-        } else {
-          regularPriceError.innerHTML = ""; // Clear error message
-        }
+      } else {
+          // Check if the price is greater than or equal to 1
+          const numericValue = parseInt(regularPriceValue, 10);
+          if (numericValue < 1) {
+              regularPriceError.innerHTML =
+                  "Regular price must be greater than or equal to 1";
+              clearErrorWithDelay(regularPriceError);
+              isValid = false;
+          } else {
+              regularPriceError.innerHTML = ""; // Clear error message
+          }
+
+          // Check if regular price is greater than sale price
+          if (numericValue <= parseInt(salePriceValue, 10)) {
+              regularPriceError.innerHTML = "Regular price must be greater than sale price and not the same";
+              clearErrorWithDelay(regularPriceError);
+              isValid = false;
+          }
       }
-    }
   }
+}
 
-  // Function to validate sale price
-  function validateSalePrice() {
-    const salePriceValue = salePrice.value.trim();
+// Function to validate sale price
+function validateSalePrice() {
+  const salePriceValue = salePrice.value.trim();
+  const regularPriceValue = regularPrice.value.trim();
 
-    if (salePriceValue === "") {
+  if (salePriceValue === "") {
       salePriceError.innerHTML = "Sale price cannot be empty";
       clearErrorWithDelay(salePriceError);
       isValid = false;
-    } else {
+  } else {
       // Check if the value is a valid number
       const isNumeric = /^\d+$/.test(salePriceValue);
 
       if (!isNumeric) {
-        salePriceError.innerHTML = "Sale price must be a number";
-        clearErrorWithDelay(salePriceError);
-        isValid = false;
-      } else {
-        // Check if the price is greater than or equal to 1
-        const numericValue = parseInt(salePriceValue, 10);
-        if (numericValue < 1) {
-          salePriceError.innerHTML =
-            "Sale price must be greater than or equal to 1";
+          salePriceError.innerHTML = "Sale price must be a number";
           clearErrorWithDelay(salePriceError);
           isValid = false;
-        } else {
-          salePriceError.innerHTML = ""; // Clear error message
-        }
+      } else {
+          // Check if the price is greater than or equal to 1
+          const numericValue = parseInt(salePriceValue, 10);
+          if (numericValue < 1) {
+              salePriceError.innerHTML =
+                  "Sale price must be greater than or equal to 1";
+              clearErrorWithDelay(salePriceError);
+              isValid = false;
+          } else {
+              salePriceError.innerHTML = ""; // Clear error message
+          }
+
+          // Check if sale price is greater than regular price
+          if (numericValue >= parseInt(regularPriceValue, 10)) {
+              salePriceError.innerHTML = "Sale price must be less than regular price and not the same";
+              clearErrorWithDelay(salePriceError);
+              isValid = false;
+          }
       }
-    }
   }
+}
+
+
 
   // Function to validate brand
   function validateBrand() {

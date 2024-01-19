@@ -99,37 +99,12 @@
                         </a>
                         <div class="categori-dropdown-wrap categori-dropdown-active-large">
                             <ul>
+                                <% categroy.forEach(function(item) { %>
+
                                 <li class="has-children">
-                                    <a href="/shop">Jackets & Coats</a>
+                                    <a href="/shop"><%=item.CategoryName%></a>
                                 </li>
-                                <li class="has-children">
-                                    <a href="/shop">T-shirt</a>
-                                </li>
-                                <li class="has-children">
-                                    <a href="/shop">Shirts</a>
-                                </li>
-                                <li class="has-children">
-                                    <a href="/shop">Innerwears</a>
-                                </li>
-                                <li class="has-children">
-                                    <a href="/shop">Trousers</a>
-                                </li>
-                                <li class="has-children">
-                                    <a href="/shop">Pants</a>
-                                </li>
-                                <li class="has-children">
-                                    <a href="/shop">Jeans</a>
-                                </li>
-                                <li class="has-children">
-                                    <a href="/shop">Sleevles</a>
-                                </li>
-                                <li class="has-children">
-                                    <a href="/shop">Gloves</a>
-                                </li>
-                                <li class="has-children">
-                    
-                                    <a href="/shop">Caps</a>
-                                </li>
+                                <% }); %>
                             </ul>
                             <div class="more_categories">Show more...</div>
                         </div>
@@ -144,10 +119,10 @@
                                 </li>
                                 <li><a href="/shop">Shop </a>
                                 </li>
-                                <li class="position-static"><a href="/shop">Special</a>
+                                <li class="position-static"><a href="/special">Special</a>
                                 </li>
                             </li>
-                            <li class="position-static"><a href="/shop">Party</a>
+                            <li class="position-static"><a href="/party">Party</a>
                             </li>
                                 <li>
                                     <a href="/contact">Contact</a>
@@ -156,7 +131,6 @@
                         </nav>
                     </div>
                 </div>
-                <p class="mobile-promotion">Happy <span class="text-brand">Mother's Day</span>. Big Sale Up to 40%</p>
                 <div class="header-action-right d-block d-lg-none">
                     <div class="header-action-2">
                         <div class="header-action-icon-2">
@@ -243,19 +217,14 @@
                 <div class="mobile-menu-wrap mobile-header-border">
                     <div class="main-categori-wrap mobile-header-border">
                         <a class="categori-button-active-2" href="#">
-                            <span class="fi-rs-apps"></span> Browse Categories
+                            <span class="fi-rs-apps"></span> Browse Categoriesugg
                         </a>
                         <div class="categori-dropdown-wrap categori-dropdown-active-small">
                             <ul>
-                                <li><a href="/shop"><i class="evara-font-dress"></i>Women's Clothing</a></li>
-                                <li><a href="/shop"><i class="evara-font-tshirt"></i>Men's Clothing</a></li>
-                                <li> <a href="/shop"><i class="evara-font-smartphone"></i> Cellphones</a></li>
-                                <li><a href="/shop"><i class="evara-font-desktop"></i>Computer & Office</a></li>
-                                <li><a href="/shop"><i class="evara-font-cpu"></i>Consumer Electronics</a></li>
-                                <li><a href="/shop"><i class="evara-font-home"></i>Home & Garden</a></li>
-                                <li><a href="/shop"><i class="evara-font-high-heels"></i>Shoes</a></li>
-                                <li><a href="/shop"><i class="evara-font-teddy-bear"></i>Mother & Kids</a></li>
-                                <li><a href="/shop"><i class="evara-font-kite"></i>Outdoor fun</a></li>
+                                <% categroy.forEach(function(item) { %>
+
+                                <li><a href="/shop"><i class="evara-font-dress"></i><%=item.CategoryName%></a></li>
+                                <% }); %>
                             </ul>
                         </div>
                     </div>
