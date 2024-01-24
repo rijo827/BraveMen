@@ -1,6 +1,6 @@
 <%-include("../partials/AdminAsideandHeader")-%>
 <section class="content-main">
-  <form action="/admin/updateproduct/<%= product._id %>" method="post" id="postform" enctype="multipart/form-data" onsubmit="return validateProductForm()">
+  <form action="/admin/updateproduct/<%= product._id %>" method="post" id="postform" enctype="multipart/form-data" onsubmit="return submitForm(event)">
     <div class="row">
       <div class="col-9">
         <div class="content-header">
@@ -10,7 +10,7 @@
               class="btn btn-md rounded font-sm hover-up"
               type="submit" 
             >
-              Publish
+              Update
             </button>
           </div>
         </div>
@@ -204,48 +204,73 @@
         </div>
         <!-- card end// -->
       </div>
-      <div class="col-lg-3">
+      <div class="col-lg-5">
         <div class="card mb-4">
           <div class="card-header">
             <h4>Media</h4>
           </div>
          <!-- Inside your updateProduct EJS template -->
          <style>
-          .image-container {
-            position: relative;
-            display: inline-block;
-            margin-right: 5px; /* Adjust as needed for spacing between images */
-          }
-        
-          .close-button {
-            position: absolute;
-            top: 0;
-            right: 0;
-            background-color: red;
-            border: none;
-            color: #fff; /* Set the color of the close button */
-            font-size: 20px;
-            cursor: pointer;
-          }
+     .image-container {
+    position: relative;
+    display: inline-block;
+    margin-right: 5px; /* Adjust as needed for spacing between images */
+}
+
+.button-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    align-items: flex-start; /* Align buttons to the top of the container */
+}
+
+.btn-icons {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 5px;
+    margin: 0 5px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.close-button {
+    background-color: red;
+    border: none;
+    color: #fff; /* Set the color of the close button */
+    font-size: 20px;
+    cursor: pointer;
+    border-radius: 50%; /* Round the close button */
+    padding: 5px;
+}
+
+
         </style>
         
-         <div class="card-body">
+        <div class="card-body">
           <div class="input-upload">
-            <% if (product.Image && product.Image.length > 0) { %>
-              <% product.Image.forEach(image => { %>
-                <div class="image-container">
-                  <img src="/imgs/Gallery/<%= image %>" alt="Product Image" />
-                  <button class="close-button" type="button" onclick="deleteImage('<%= image %>')">&times;</button>
-                </div>
-              <% }); %>
-            <% } else { %>
-              <img src="/AdminAssets/imgs/theme/upload.svg" alt="Placeholder" />
-            <% } %>
-            <input class="form-control" type="file" name="newimages" multiple id="product_images"/>
+              <% if (product.Image && product.Image.length > 0) { %>
+                  <% product.Image.forEach(image => { %>
+                      <div class="image-container">
+                          <img src="/imgs/Gallery/<%= image %>" alt="Product Image" id="product_image<%= image %>" />
+                          <div class="button-container">
+                              <button id="cropButton" class="btn-icons"><i class="fas fa-crop"></i></button>
+                              <button id="cancelButton" class="btn-icons"><i class="fas fa-times"></i></button>
+                              <button id="deleteButton<%= image %>" class="btn-icons close-button" type="button" onclick="deleteImage('<%= image %>', 'deleteButton<%= image %>')">&#10006;</button>
+                              <button id="undoButton" class="btn-icons" onclick="undoDeletion('<%= image %>')">&#8722;</button>
+                          </div>
+                      </div>
+                  <% }); %>
+              <% } else { %>
+                  <img src="/AdminAssets/imgs/theme/upload.svg" alt="Placeholder" />
+              <% } %>
+              <input type="hidden" name="deletedImages" id="deletedImagesInput" value="" />
+
+              <input class="form-control" type="file" name="newimages" multiple id="product_images" />
           </div>
           <span id="imagesError" class="err"></span>
-        </div>
-        
+      </div>
+      
 
         </div>
         <!-- card end// -->
@@ -258,9 +283,10 @@
               <div class="col-sm-12 mb-1">
                 <label class="form-label">Category</label>
                 <select class="form-select" name="newcategory" id="product_cat">
+                  <option value="65a4dbd9aadd0119c63f7fff">Jeans</option>
                   <option value="Category">Category</option>
                   <% category.forEach(function(item) { %>
-                  <option value="<%=item._id%>"><%=item.CategoryName%></option>
+                  <option <%= item._id == 'product.category' ? 'selected' : '' %> value="<%=item.CategoryName%>"><%=item.CategoryName%></option>
                   <% }); %>
                 </select>
                 <span id="categoryError" class="err"></span>
@@ -276,27 +302,158 @@
 </section>
 <%-include("../partials/AdminFooter")-%>
 <script>
-  function submitForm() {
-    $("#postform").submit(function (event) {
-      event.preventDefault(); // Prevent the default form submission
-      // Additional logic or validation can be added here if needed
-      $(this).unbind("submit").submit(); // Actual form submission
-    });
-  }
-  function deleteImage(imageFilename) {
-        // Send an AJAX request to delete the image
-        $.ajax({
-            url: '/admin/deleteimage',
-            method: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify({ imageName: imageFilename }),
-            success: function(response) {
-                console.log(response);
-                // Optionally, update the UI to reflect the image deletion
-            },
-            error: function(error) {
-                console.error(error);
-            }
-        });
+  function submitForm(e) {
+    if(validateUpdateProductForm()){
+      document.getElementById('deletedImagesInput').value = JSON.stringify(deletedImages);
+
+      let product_images = [];
+      product_images = document.getElementById("product_images")
+      const length = "<%=len%>"
+      console.log("product_images  ===>>  ",product_images.files.length);
+      console.log(product_images.files);
+      if(length-deletedImages.length + product_images.files.length<=5){
+        
+        return true
+      }
+      else{
+        Swal.fire({
+                icon: 'error',
+                title: 'Image Error!!',
+                text: 'Maximum length Reached',
+            });
+            return false
+      }
+    }else{
+      return false
     }
+  }
+  let deletedImages = [];
+  function deleteImage(imageFilename, buttonID) {
+  
+  const length = "<%=len%>"
+  console.log("length  ===>>>  ",length);
+  let product_images = document.getElementById("product_images")
+
+  if(deletedImages.length < length-1 || product_images.files.length > 0){
+    if(deletedImages.includes(imageFilename)){
+      Swal.fire({
+                icon: 'error',
+                title: 'Image Error!!',
+                text: 'File already selected for deletion',
+            });
+
+    }else{
+      deletedImages.push(imageFilename);
+      console.log('deletedImages.length:', deletedImages.length);
+      console.log('images.length:', length);
+      console.log('Deleting image:', imageFilename);
+      console.log('Images queued for deletion:', deletedImages);
+    }
+            
+  }else{
+    Swal.fire({
+                icon: 'error',
+                title: 'Image Error!!',
+                text: 'Atlest One image should be present in the product',
+            });
+  }
+    // if (deletedImages.length > 0) {
+    //   console.log("deletedImages====>>>",deletedImages);
+    //     // Loop through the images and send AJAX requests for deletion
+    //     deletedImages.forEach(function (imageFilename) {
+    //         $.ajax({
+    //             url: '/admin/deleteimage',
+    //             method: 'POST',
+    //             contentType: 'application/json',
+    //             data: JSON.stringify({ imageName: imageFilename }),
+    //             success: function (response) {
+    //                 console.log('Deletion response:', response);
+    //                 // Optionally, update the UI to reflect the image deletion
+    //             },
+    //             error: function (xhr, status, error) {
+    //                 console.error('AJAX Error:', xhr, status, error);
+    //             },
+    //             complete: function (xhr, status) {
+    //                 console.log('AJAX Complete:', xhr, status);
+    //             }
+    //         });
+    //     });
+
+    //     // Clear the array after deletion
+    //     deletedImages = [];
+    // }
+    // // Optionally, update the UI to reflect the image deletion (you can remove this line)
+    // $('#product_image' + buttonID).remove();
+}
+
+
+function undoDeletion(imageFilename) {
+    if (deletedImages.length > 0) {
+      if(deletedImages.includes(imageFilename)){
+        const index = deletedImages.indexOf(imageFilename);
+          deletedImages.splice(index,1)
+          updateButtonIcon('deleteButton' + imageFilename, 'minus');
+          // Optionally, update the UI to re-display the last deleted image
+          console.log('Undo deletion of image:', deletedImages);
+      }else{
+        Swal.fire({
+                icon: 'error',
+                title: 'Image Error!!',
+                text: 'The file is not selected for deletion',
+            });
+      }
+    } else {
+      Swal.fire({
+                icon: 'error',
+                title: 'Image Error!!',
+                text: 'No file selected for deletion',
+            });
+
+        console.log('No file selected for deletion.');
+    }
+}
+
+function updateButtonIcon(buttonID, icon) {
+    const button = document.getElementById(buttonID);
+    if (button) {
+        const span = button.querySelector('span');
+        if (span) {
+            span.innerHTML = icon === 'cross' ? '&#10006;' : '&#8722;';
+        }
+    }
+}
+
+    document.addEventListener('DOMContentLoaded', function () {
+    const cropButton = document.getElementById('cropButton');
+    const cancelButton = document.getElementById('cancelButton');
+    const image = document.getElementById('product_image');
+    let cropper; // Declare cropper variable outside the event listeners
+
+    cropButton.addEventListener('click', function () {
+      // Initialize the Cropper instance
+      cropper = new Cropper(image, {
+        aspectRatio: 16 / 9,
+        crop(event) {
+          console.log(event.detail.x);
+          console.log(event.detail.y);
+          console.log(event.detail.width);
+          console.log(event.detail.height);
+          console.log(event.detail.rotate);
+          console.log(event.detail.scaleX);
+          console.log(event.detail.scaleY);
+        },
+      });
+    });
+
+    cancelButton.addEventListener('click', function () {
+      // Check if cropper instance exists before attempting to cancel
+      if (cropper) {
+        // Destroy the Cropper instance
+        cropper.destroy();
+        console.log('Cropping process cancelled.');
+      } else {
+        console.log('No active cropping process to cancel.');
+      }
+    });
+  });
 </script>

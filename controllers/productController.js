@@ -61,10 +61,14 @@ const updateProduct = async (req, res) => {
     newshippingFees,
     newtaxRate,
     newcategory,
+    deletedImages
   } = req.body;
 
-  const newimages = req.files.map((file) => file.filename);
-  console.log("newimages=====>>.", newimages);
+  // Check if new images are provided
+  const newImages = req.files.map((file) => file.filename);
+  console.log("newImages=====>>.", newImages);
+  console.log("deletedImages=====>>.", deletedImages);
+
 
   try {
     const productID = req.params.product_id;
@@ -91,13 +95,19 @@ const updateProduct = async (req, res) => {
     existingProduct.shippingFees = newshippingFees;
     existingProduct.taxRate = newtaxRate;
     existingProduct.category = newcategory;
-    existingProduct.Image = newimages;
 
-    if (existingProduct) {
-      await existingProduct.save();
-      console.log("Updated successfully");
-      res.redirect("/admin/all_products");
+    // Check if new images are provided before updating
+    if (deletedImages.length > 0) {
+      existingProduct.Image = existingProduct.Image.filter(image => !deletedImages.includes(image));
+  }
+  
+    if (newImages.length > 0) {
+      existingProduct.Image = existingProduct.Image.concat(newImages) 
     }
+
+    await existingProduct.save();
+    console.log("Updated successfully");
+    res.redirect("/admin/all_products");
   } catch (error) {
     console.log(error);
     return res.status(500).json({ error: "Internal server error." });
@@ -114,10 +124,13 @@ const showUpdatedProduct = async (req, res) => {
     if (product) {
       const categoryDetails = await categoryModel.find({ isActvie: true });
       console.log("Category", categoryDetails);
+      const length = product.Image.length
+      console.log("product.Image.length", length);
       res.render("updateProduct", {
         isAuthenticted: true,
         product: product,
         category: categoryDetails,
+        len:length
       });
     } else {
       console.log("Not logged");
@@ -129,23 +142,7 @@ const showUpdatedProduct = async (req, res) => {
   }
 };
 
-const deleteimage = async (req, res) => {
-  const image = req.body.imageName;
-  console.log("image====>>", image);
-  try {
-    const Product = await ProductModel.findOne({ Image: image });
-    console.log("Product ====>>", Product);
-    const img = Product.Image;
-    console.log("img ====>>", img);
-    const index = img.indexOf(img);
 
-    img.splice(index, 1);
-
-    console.log("img after delete====>>", img);
-
-    Product.save();
-  } catch (error) {}
-};
 
 const loadAddProduct = async (req, res) => {
   try {
@@ -246,6 +243,5 @@ module.exports = {
   deleteOneProduct,
   updateProduct,
   showUpdatedProduct,
-  deleteimage,
   productStatusUpdate,
 };

@@ -3,8 +3,8 @@ const nodemailer = require("nodemailer");
 const randomstring = require("randomstring");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const catModel= require('../models/categoryModel')
-const productModel = require('../models/ProductModel')
+const catModel = require("../models/categoryModel");
+const productModel = require("../models/ProductModel");
 
 // let generatedOtp = "";
 const transporter = nodemailer.createTransport({
@@ -122,20 +122,21 @@ const updatePassword = async (req, res) => {
 const forgotPassword = async (req, res) => {
   const err = req.query.err;
   const msg = req.query.msg;
-  let categroy= await catModel.find({isActvie:true})
-
+  let categroy = await catModel.find({ isActvie: true });
 
   if (err) {
     res.render("forgotPassword", {
       succmsg: "",
       errmsg: msg,
-      isAuthenticted: false,categroy:categroy
+      isAuthenticted: false,
+      categroy: categroy,
     });
   } else {
     res.render("forgotPassword", {
       succmsg: msg,
       errmsg: "",
-      isAuthenticted: false,categroy:categroy
+      isAuthenticted: false,
+      categroy: categroy,
     });
   }
 };
@@ -199,19 +200,21 @@ const loadRegister = async (req, res) => {
   try {
     const err = req.query.err;
     const msg = req.query.msg;
-    let categroy= await catModel.find({isActvie:true})
+    let categroy = await catModel.find({ isActvie: true });
 
     if (err) {
       res.render("register", {
         errmsg: msg,
         succmsg: "",
-        isAuthenticted: false,categroy:categroy
+        isAuthenticted: false,
+        categroy: categroy,
       });
     } else {
       res.render("register", {
         succmsg: msg,
         errmsg: "",
-        isAuthenticted: false,categroy:categroy
+        isAuthenticted: false,
+        categroy: categroy,
       });
     }
   } catch (error) {
@@ -223,12 +226,22 @@ const loadLogin = async (req, res) => {
   try {
     const err = req.query.err;
     const msg = req.query.msg;
-  let categroy= await catModel.find({isActvie:true})
+    let categroy = await catModel.find({ isActvie: true });
 
     if (err) {
-      res.render("login", { errmsg: msg, succmsg: "", isAuthenticted: false ,categroy:categroy});
+      res.render("login", {
+        errmsg: msg,
+        succmsg: "",
+        isAuthenticted: false,
+        categroy: categroy,
+      });
     } else {
-      res.render("login", { succmsg: msg, errmsg: "", isAuthenticted: false ,categroy:categroy});
+      res.render("login", {
+        succmsg: msg,
+        errmsg: "",
+        isAuthenticted: false,
+        categroy: categroy,
+      });
     }
   } catch (error) {
     console.log(error);
@@ -294,17 +307,16 @@ const loadhome = async (req, res) => {
   let user = req.cookies?.jwttoken;
   let userID = req.cookies?.userID;
   console.log("userId >>>>>>", userID);
-  let categroy= await catModel.find({isActvie:true})
-  console.log("catgegroy>>>",categroy);
+  let categroy = await catModel.find({ isActvie: true });
+  console.log("catgegroy>>>", categroy);
   if (user && userID) {
     let thisUser = await userModel.findById(userID);
-    
 
     console.log("User name>>>>", thisUser.Firstname);
-    res.render("home", { isAuthenticted: true ,categroy:categroy});
+    res.render("home", { isAuthenticted: true, categroy: categroy });
   } else {
     console.log("its else");
-    res.render("home", { isAuthenticted: false ,categroy:categroy});
+    res.render("home", { isAuthenticted: false, categroy: categroy });
   }
 };
 
@@ -313,15 +325,14 @@ const userAccountGet = async (req, res) => {
     let token = req.cookies.jwttoken;
     let userID = req.cookies.userID;
     if (token && userID) {
-      let categroy= await catModel.find({isActvie:true})
-      res.render("userAccount", { isAuthenticted: true ,categroy:categroy});
+      let categroy = await catModel.find({ isActvie: true });
+      res.render("userAccount", { isAuthenticted: true, categroy: categroy });
       // res.render("home",{isAuthenticted: true})
     } else {
       res.redirect("/login?err=true&msg=Login first to access it");
     }
   } catch (error) {}
 };
-
 
 const loggoutUser = async (req, res) => {
   let user = req.cookies?.jwttoken;
@@ -333,64 +344,96 @@ const loggoutUser = async (req, res) => {
   }
 };
 
-
-const showShop = async (req,res)=>{
-
+const showShop = async (req, res) => {
   try {
+    let categroy = await catModel.find({ isActvie: true });
+    let product = await productModel
+      .find({ isActive: false, isDeleted: false })
+      .populate("category");
 
-    let categroy= await catModel.find({isActvie:true})
-    let product= await productModel.find({isActive:false,isDeleted:false}).populate( "category" );
-    
-    res.render("shopProduct",{ isAuthenticted: true ,categroy:categroy,products:product})
-    
+    res.render("shopProduct", {
+      isAuthenticted: true,
+      categroy: categroy,
+      products: product,
+    });
   } catch (error) {
     console.log(error);
   }
-}
+};
 
-
-const showSpecial= async (req,res)=>{
-
+const showSpecial = async (req, res) => {
   try {
-    let categroy= await catModel.find({isActvie:true})
-    let product= await productModel.find({isActive:false,isDeleted:false,'type': 'Special'}).populate( "category" );
+    let categroy = await catModel.find({ isActvie: true });
+    let product = await productModel
+      .find({ isActive: false, isDeleted: false, type: "Special" })
+      .populate("category");
 
-    res.render("special",{ isAuthenticted: true ,categroy:categroy,products:product})
-    
+    res.render("shopProduct", {
+      isAuthenticted: true,
+      categroy: categroy,
+      products: product,
+    });
   } catch (error) {
     console.log(error);
   }
-}
+};
 
-const showParty= async (req,res)=>{
-
+const showParty = async (req, res) => {
   try {
-    let categroy= await catModel.find({isActvie:true})
-    let product= await productModel.find({isActive:false,isDeleted:false,'type': 'Party'}).populate( "category" );
+    let categroy = await catModel.find({ isActvie: true });
+    let product = await productModel
+      .find({ isActive: false, isDeleted: false, type: "Party" })
+      .populate("category");
 
-    res.render("special",{ isAuthenticted: true ,categroy:categroy,products:product})
-    
+    res.render("shopProduct", {
+      isAuthenticted: true,
+      categroy: categroy,
+      products: product,
+    });
   } catch (error) {
     console.log(error);
   }
-}
+};
 
-
-const showProductDetails= async (req,res)=>{
-
+const showProductDetails = async (req, res) => {
   try {
-    let categroy= await catModel.find({isActvie:true})
-    let product= await productModel.find({isActive:false,isDeleted:false,'type': 'Party'}).populate( "category" );
-
-
-    res.render("productDetail",{ isAuthenticted: true ,categroy:categroy,products:product})
-    
-
-    
+    const categroy = await catModel.find({ isActvie: true });
+    const productID = req.params.product_id;
+    const product = await productModel.findById(productID).populate("category");
+    console.log("productID====>>>", productID);
+    if (product.isActive == false && product.isDeleted == false) {
+      res.render("productDetail", {
+        isAuthenticted: true,
+        categroy: categroy,
+        product: product,
+      });
+    } else {
+      res.render("productDetail", {
+        isAuthenticted: false,
+        categroy: categroy,
+        products: product,
+      });
+    }
   } catch (error) {
     console.log(error);
-    
   }
+};
+
+
+
+const showAbout = async (req,res)=>{
+  const categroy = await catModel.find({ isActvie: true });
+  try {
+    res.render("page-about", {
+      isAuthenticted: true,
+      categroy: categroy,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+
+ 
+
 }
 
 module.exports = {
@@ -409,4 +452,5 @@ module.exports = {
   showSpecial,
   showParty,
   showProductDetails,
+  showAbout,
 };

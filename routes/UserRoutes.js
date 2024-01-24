@@ -30,8 +30,8 @@ userroute.post('/send-otp',userControler.SendOtp)
 userroute.get('/shop',userMiddleware.islogin,userControler.showShop)
 userroute.get('/special',userMiddleware.islogin,userControler.showSpecial)
 userroute.get('/party',userMiddleware.islogin,userControler.showParty)
-userroute.get('/productdetails',userMiddleware.islogin,userControler.showProductDetails)
-userroute.get('/about',(req,res)=>{res.render("page-about")})
+userroute.get('/productdetails/:product_id',userMiddleware.islogin,userControler.showProductDetails)
+userroute.get('/about',userMiddleware.islogin,userControler.showAbout)
 userroute.get('/contact',(req,res)=>{res.render("page-contact")})
 
 
