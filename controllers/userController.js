@@ -185,7 +185,7 @@ const insertUser = async (req, res) => {
         });
         console.log(" payload=====>>>", payload);
         console.log("token======>>>>", token);
-        res.cookie("jwttoken", token, { httpOnly: true });
+        res.cookie("jwtusertoken", token, { httpOnly: true });
         res.cookie("userID", payload.UserID, { httpOnly: true });
         console.log(" req.session.userID  ===>>", req.session.userID);
         console.log("Account created successfully");
@@ -276,7 +276,7 @@ const loggingUser = async (req, res) => {
             User.save()
               .then(() => {
                 console.log("token======>>>>", token);
-                res.cookie("jwttoken", token, { httpOnly: true });
+                res.cookie("jwtusertoken", token, { httpOnly: true });
                 res.cookie("userID", payload.UserID, { httpOnly: true });
                 console.log("Yes Its U");
                 res.redirect("/");
@@ -304,25 +304,29 @@ const loggingUser = async (req, res) => {
 
 const loadhome = async (req, res) => {
   // let user = req.session.userID;
-  let user = req.cookies?.jwttoken;
-  let userID = req.cookies?.userID;
+  let user = req.cookies?.jwtusertoken;
+  let userID = req.cookies  .userID;
   console.log("userId >>>>>>", userID);
   let categroy = await catModel.find({ isActvie: true });
-  console.log("catgegroy>>>", categroy);
+  let product = await productModel
+  .find({ isActive: false, isDeleted: false })
+  .populate("category");
+
   if (user && userID) {
     let thisUser = await userModel.findById(userID);
 
     console.log("User name>>>>", thisUser.Firstname);
-    res.render("home", { isAuthenticted: true, categroy: categroy });
+    res.render("home", { isAuthenticted: true, categroy: categroy,
+      products: product,});
   } else {
     console.log("its else");
-    res.render("home", { isAuthenticted: false, categroy: categroy });
+    res.render("home", { isAuthenticted: false, categroy: categroy, products: product });
   }
 };
 
 const userAccountGet = async (req, res) => {
   try {
-    let token = req.cookies.jwttoken;
+    let token = req.cookies.jwtusertoken;
     let userID = req.cookies.userID;
     if (token && userID) {
       let categroy = await catModel.find({ isActvie: true });
@@ -335,10 +339,10 @@ const userAccountGet = async (req, res) => {
 };
 
 const loggoutUser = async (req, res) => {
-  let user = req.cookies?.jwttoken;
+  let user = req.cookies?.jwtusertoken;
 
   if (user) {
-    res.clearCookie("jwttoken");
+    res.clearCookie("jwtusertoken");
     console.log("its cleared");
     res.redirect("/");
   }

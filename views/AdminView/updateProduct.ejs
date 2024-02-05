@@ -348,6 +348,8 @@
       console.log('images.length:', length);
       console.log('Deleting image:', imageFilename);
       console.log('Images queued for deletion:', deletedImages);
+      updateButtonVisibility(buttonID.replace('deleteButton', 'deleteButton<%= image %>'), true);
+        
     }
             
   }else{
@@ -412,7 +414,12 @@ function undoDeletion(imageFilename) {
         console.log('No file selected for deletion.');
     }
 }
-
+function updateButtonVisibility(buttonID, isVisible) {
+    const button = document.getElementById(buttonID);
+    if (button) {
+        button.style.display = isVisible ? 'inline-block' : 'none';
+    }
+}
 function updateButtonIcon(buttonID, icon) {
     const button = document.getElementById(buttonID);
     if (button) {
@@ -421,6 +428,7 @@ function updateButtonIcon(buttonID, icon) {
             span.innerHTML = icon === 'cross' ? '&#10006;' : '&#8722;';
         }
     }
+    updateButtonVisibility(buttonID, false);
 }
 
     document.addEventListener('DOMContentLoaded', function () {

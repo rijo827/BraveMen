@@ -6,7 +6,7 @@ const userModel = require('../models/userModel');
 
 const islogout = (req, res, next) => {
  
-  const token = req.cookies?.jwttoken
+  const token = req.cookies?.jwtusertoken
 console.log("token====>>>",token);
     if (!token) {
       console.log("User not loged in!");   
@@ -28,7 +28,7 @@ console.log("token====>>>",token);
 
   const islogin = async (req, res, next) => {
  
-    if (req.cookies?.jwttoken) {
+    if (req.cookies?.jwtusertoken) {
       console.log("User loged in!");   
       const userID=req.cookies.userID
       const user= await  userModel.findById(userID)
