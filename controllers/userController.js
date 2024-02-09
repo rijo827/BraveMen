@@ -104,8 +104,7 @@ const updatePassword = async (req, res) => {
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-        user.Password = hashedPassword;
-        await user.save();
+        await userModel.updateOne({ Email: Email }, { Password: hashedPassword });
 
         console.log("Password updated successfully");
         res.redirect("/login");
@@ -138,6 +137,64 @@ const forgotPassword = async (req, res) => {
       isAuthenticted: false,
       categroy: categroy,
     });
+  }
+};
+
+const getForgotUserPassword = async (req, res) => {
+  const err = req.query.err;
+  const msg = req.query.msg;
+  let categroy = await catModel.find({ isActvie: true });
+
+  if (err) {
+    res.render("forgotUserPassword", {
+      succmsg: "",
+      errmsg: msg,
+      isAuthenticted: true,
+      categroy: categroy,
+    });
+  } else {
+    res.render("forgotUserPassword", {
+      succmsg: "",
+      errmsg: msg,
+      isAuthenticted: true,
+      categroy: categroy,
+    });
+  }
+};
+
+const updateUserPassword = async (req, res) => {
+  try {
+    console.log("Updated USer Password");
+    const Email = req.body.Email;
+    const updatePassword = req.body.newPassword;
+
+    // Find the user by email
+    const user = await userModel.findOne({ Email: Email });
+
+    if (user) {
+      // Compare the provided password with the hashed password in the database
+      const isPasswordMatch = await bcrypt.compare(updatePassword, user.Password);
+
+      if (isPasswordMatch) {
+        console.log("You can't use the same password");
+        res.redirect(
+          "/forgotuserPassword?err=true&msg=You can't use the same password"
+        );
+      } else {
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(updatePassword , saltRounds);
+
+        await userModel.updateOne({ Email: Email }, { Password: hashedPassword });
+
+        console.log("Password updated successfully");
+        res.redirect("/account");
+      }
+    } else {
+      console.log("User not found ");
+      res.redirect("/forgotuserPassword?err=true&msg=User not found");
+    }
+  } catch (error) {
+    console.error(error);
   }
 };
 
@@ -329,8 +386,9 @@ const userAccountGet = async (req, res) => {
     let token = req.cookies.jwtusertoken;
     let userID = req.cookies.userID;
     if (token && userID) {
-      let categroy = await catModel.find({ isActvie: true });
-      res.render("userAccount", { isAuthenticted: true, categroy: categroy });
+      const categroy = await catModel.find({ isActvie: true });
+      const user = await userModel.findById(userID)
+      res.render("userAccount", { isAuthenticted: true, categroy: categroy,User:user });
       // res.render("home",{isAuthenticted: true})
     } else {
       res.redirect("/login?err=true&msg=Login first to access it");
@@ -435,10 +493,20 @@ const showAbout = async (req,res)=>{
   } catch (error) {
     console.log(error);
   }
-
- 
-
 }
+
+const updateUser = async (req, res) => {
+    
+  try {
+    let userID = req.cookies.userID;
+
+
+
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 
 module.exports = {
   insertUser,
@@ -457,4 +525,7 @@ module.exports = {
   showParty,
   showProductDetails,
   showAbout,
+  getForgotUserPassword,
+  updateUserPassword,
+  updateUser,
 };

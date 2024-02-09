@@ -214,15 +214,27 @@
      .image-container {
     position: relative;
     display: inline-block;
-    margin-right: 5px; /* Adjust as needed for spacing between images */
+    margin-right: 20px; 
+    margin-bottom: 20px;
 }
 
-.button-container {
+.button-container-right {
     position: absolute;
     top: 0;
     right: 0;
     display: flex;
+    flex-direction: column; /* Align buttons vertically */
     align-items: flex-start; /* Align buttons to the top of the container */
+}
+
+.button-container-left {
+    position: absolute;
+    bottom: 0;
+    left: 50%; /* Center the container horizontally */
+    transform: translateX(-50%); /* Move the container back by half its width */
+    display: flex;
+    flex-direction: row; /* Align buttons vertically */
+    align-items: center; /* Align buttons to the center horizontally */
 }
 
 .btn-icons {
@@ -233,15 +245,25 @@
     border-radius: 50%;
     cursor: pointer;
 }
-
+.undo-btn{
+  background-color: #fff;
+    border: 1px solid #ddd;
+    margin: 0 5px;
+    border-radius: 50%;
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+}
 .close-button {
     background-color: red;
     border: none;
     color: #fff; /* Set the color of the close button */
-    font-size: 20px;
+    font-size: 10px;
     cursor: pointer;
     border-radius: 50%; /* Round the close button */
-    padding: 5px;
+    padding: 3px;
+    width: 20px;
+    height: 20px;
 }
 
 
@@ -253,12 +275,17 @@
                   <% product.Image.forEach(image => { %>
                       <div class="image-container">
                           <img src="/imgs/Gallery/<%= image %>" alt="Product Image" id="product_image<%= image %>" />
-                          <div class="button-container">
-                              <button id="cropButton" class="btn-icons"><i class="fas fa-crop"></i></button>
-                              <button id="cancelButton" class="btn-icons"><i class="fas fa-times"></i></button>
-                              <button id="deleteButton<%= image %>" class="btn-icons close-button" type="button" onclick="deleteImage('<%= image %>', 'deleteButton<%= image %>')">&#10006;</button>
-                              <button id="undoButton" class="btn-icons" onclick="undoDeletion('<%= image %>')">&#8722;</button>
+                          <div class="button-container-left">
+                            <button id="cropButton" class="btn-icons">crop</button>
+                            <button id="cancelButton" class="btn-icons">undo</button>
                           </div>
+                          <div class="button-container-right">
+                            <button id="deleteButton<%= image %>" class="btn-icons close-button" type="button" onclick="deleteImage('<%= image %>', 'deleteButton<%= image %>')">&#10006;</button>
+                            <button id="undoButton" class="undo-btn" onclick="undoDeletion('<%= image %>')">&#8722;</button>
+                          </div>
+                          
+                         
+                          
                       </div>
                   <% }); %>
               <% } else { %>
@@ -348,7 +375,6 @@
       console.log('images.length:', length);
       console.log('Deleting image:', imageFilename);
       console.log('Images queued for deletion:', deletedImages);
-      updateButtonVisibility(buttonID.replace('deleteButton', 'deleteButton<%= image %>'), true);
         
     }
             
@@ -359,33 +385,6 @@
                 text: 'Atlest One image should be present in the product',
             });
   }
-    // if (deletedImages.length > 0) {
-    //   console.log("deletedImages====>>>",deletedImages);
-    //     // Loop through the images and send AJAX requests for deletion
-    //     deletedImages.forEach(function (imageFilename) {
-    //         $.ajax({
-    //             url: '/admin/deleteimage',
-    //             method: 'POST',
-    //             contentType: 'application/json',
-    //             data: JSON.stringify({ imageName: imageFilename }),
-    //             success: function (response) {
-    //                 console.log('Deletion response:', response);
-    //                 // Optionally, update the UI to reflect the image deletion
-    //             },
-    //             error: function (xhr, status, error) {
-    //                 console.error('AJAX Error:', xhr, status, error);
-    //             },
-    //             complete: function (xhr, status) {
-    //                 console.log('AJAX Complete:', xhr, status);
-    //             }
-    //         });
-    //     });
-
-    //     // Clear the array after deletion
-    //     deletedImages = [];
-    // }
-    // // Optionally, update the UI to reflect the image deletion (you can remove this line)
-    // $('#product_image' + buttonID).remove();
 }
 
 
@@ -414,54 +413,43 @@ function undoDeletion(imageFilename) {
         console.log('No file selected for deletion.');
     }
 }
-function updateButtonVisibility(buttonID, isVisible) {
-    const button = document.getElementById(buttonID);
-    if (button) {
-        button.style.display = isVisible ? 'inline-block' : 'none';
-    }
-}
-function updateButtonIcon(buttonID, icon) {
-    const button = document.getElementById(buttonID);
-    if (button) {
-        const span = button.querySelector('span');
-        if (span) {
-            span.innerHTML = icon === 'cross' ? '&#10006;' : '&#8722;';
-        }
-    }
-    updateButtonVisibility(buttonID, false);
-}
 
-    document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', function () {
     const cropButton = document.getElementById('cropButton');
     const cancelButton = document.getElementById('cancelButton');
     const image = document.getElementById('product_image');
     let cropper; // Declare cropper variable outside the event listeners
+   console.log("cropping image");
+    if (cropButton && cancelButton && image) {
+        cropButton.addEventListener('click', function () {
+            // Initialize the Cropper instance
+            cropper = new Cropper(image, {
+                aspectRatio: 16 / 9,
+                crop(event) {
+                    console.log(event.detail.x);
+                    console.log(event.detail.y);
+                    console.log(event.detail.width);
+                    console.log(event.detail.height);
+                    console.log(event.detail.rotate);
+                    console.log(event.detail.scaleX);
+                    console.log(event.detail.scaleY);
+                },
+            });
+        });
 
-    cropButton.addEventListener('click', function () {
-      // Initialize the Cropper instance
-      cropper = new Cropper(image, {
-        aspectRatio: 16 / 9,
-        crop(event) {
-          console.log(event.detail.x);
-          console.log(event.detail.y);
-          console.log(event.detail.width);
-          console.log(event.detail.height);
-          console.log(event.detail.rotate);
-          console.log(event.detail.scaleX);
-          console.log(event.detail.scaleY);
-        },
-      });
-    });
+        cancelButton.addEventListener('click', function () {
+            // Check if cropper instance exists before attempting to cancel
+            if (cropper) {
+                // Destroy the Cropper instance
+                cropper.destroy();
+                console.log('Cropping process cancelled.');
+            } else {
+                console.log('No active cropping process to cancel.');
+            }
+        });
+    } else {
+        console.error('One or more elements not found. Check your element IDs.');
+    }
+});
 
-    cancelButton.addEventListener('click', function () {
-      // Check if cropper instance exists before attempting to cancel
-      if (cropper) {
-        // Destroy the Cropper instance
-        cropper.destroy();
-        console.log('Cropping process cancelled.');
-      } else {
-        console.log('No active cropping process to cancel.');
-      }
-    });
-  });
 </script>

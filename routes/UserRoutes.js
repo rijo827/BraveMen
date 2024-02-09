@@ -9,7 +9,13 @@ userroute.set('views','./views/Userview')
 userroute.use(bodyParser.urlencoded({extended: false}))
 
 userroute.get('/',userControler.loadhome)
+
+
 userroute.get('/account', userMiddleware.islogin,userControler.userAccountGet)
+userroute.get('/forgotuserPassword',userMiddleware.islogin, userControler.getForgotUserPassword)
+userroute.post('/resetuserpassword',userMiddleware.islogin, userControler.updateUserPassword)
+
+
 
 userroute.get('/login', userMiddleware.islogout, userControler.loadLogin)
 userroute.post('/login',userMiddleware.islogout, userControler.loggingUser)
