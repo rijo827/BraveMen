@@ -29,7 +29,7 @@
                                             <a class="nav-link" id="address-tab" data-bs-toggle="tab" href="#address" role="tab" aria-controls="address" aria-selected="true"><i class="fi-rs-marker mr-10"></i>My Address</a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link" id="account-detail-tab" data-bs-toggle="tab" href="#account-detail" role="tab" aria-controls="account-detail" aria-selected="true"><i class="fi-rs-user mr-10"></i>Account details</a>
+                                            <a class="nav-link" id="account-detail-tab" data-bs-toggle="tab"  role="tab" href="#account-detail" aria-controls="account-detail" aria-selected="true" ><i class="fi-rs-user mr-10"></i>Account details</a>
                                         </li>
                                         <li class="nav-item">
                                             <a class="nav-link" href="/logout"><i class="fi-rs-sign-out mr-10"></i>Logout</a>
@@ -42,7 +42,7 @@
                                     <div class="tab-pane fade active show" id="dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
                                         <div class="card">
                                             <div class="card-header">
-                                                <h5 class="mb-0">Hello Rosie! </h5>
+                                                <h5 class="mb-0">Hello <%=User.Firstname%>!</h5>
                                             </div>
                                             <div class="card-body">
                                                 <p>From your account dashboard. you can easily check &amp; view your <a href="#">recent orders</a>, manage your <a href="#">shipping and billing addresses</a> and <a href="#">edit your password and account details.</a></p>
@@ -121,8 +121,13 @@
                                     </div>
                                     <div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab">
                                         <div class="row">
-                                            <div class="col-lg-6">
+                                            <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                                                <a href="/addaddress" class="btn btn-primary btn-sm rounded"
+                                                  >Add Address</a>
+                                              </div>
+                                            <div class="col-lg-6">  
                                                 <div class="card mb-3 mb-lg-0">
+
                                                     <div class="card-header">
                                                         <h5 class="mb-0">Billing Address</h5>
                                                     </div>
@@ -148,6 +153,26 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div>
+                                        <style>
+                                         .succmsg{
+                                             background-color: aquamarine;
+                                             text-align: center;
+                                             color: white;
+                                         }
+                                         .errmsg{
+                                             background-color: rgb(236, 109, 109);
+                                             text-align: center;
+                                             color: white;
+                                         }
+                                         
+                                        </style>
+                                         <% if(errmsg){%>
+                                             <p class="errmsg" id="errmsg"><%= errmsg%></p>
+                                             <%}else{%>
+                                                 <p class="succmsg" id="succmsg"><%= succmsg%></p>
+                                             <%}%>
+                                     </div>
                                     <div class="tab-pane fade" id="account-detail" role="tabpanel" aria-labelledby="account-detail-tab">
                                         <div class="card">
                                             <div class="card-header">
@@ -155,37 +180,39 @@
                                             </div>
                                             <div class="card-body">
                                                 <p>Already have an account? <a href="page-login-register.html">Log in instead!</a></p>
-                                                <form method="post" name="enq">
+                                                <form method="post" action="/updateuserdetails">
                                                     <div class="row">
+                                                      
                                                         <div class="form-group col-md-6">
                                                             <label>First Name <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="name" type="text" value="<%= User.Firstname %>">
+                                                            <input required="" class="form-control square" name="Firstname" id="Firstname" type="text">
                                                         </div>
                                                         <div class="form-group col-md-6">
                                                             <label>Last Name <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="phone" value="<%= User.Lastname %>">
+                                                            <input required="" class="form-control square" name="Lastname"  id="Lastname">
                                                         </div>
                                                         <div class="form-group col-md-12">
-                                                            <label>Phone NUmber <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="dname" type="text" value="<%= User.Phone %>">
+                                                            <label>Phone Number <span class="required">*</span></label>
+                                                            <input required="" class="form-control square" name="Phone" type="text" id="Phone" >
                                                         </div>
                                                         <div class="form-group col-md-12">
                                                             <label>Email Address <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="email" type="email" value="<%= User.Email %>">
+                                                            <input required="" class="form-control square" name="Email" type="email" id="Email" >
                                                         </div>
                                                         <div class="form-group col-md-12">
                                                             <label>Current Password <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="password" type="password">
-                                                            <small>Do you forgot Password ? <span> </span><a href="/forgotuserPassword">Forgot Password</a></small>
+                                                            <input required="" class="form-control square" id="currentPassword" name="currentPassword" type="password" onchange="checkCurrentPassword()">
+                                                            <small>Forgot your password? <a href="/forgotuserPassword">Forgot Password</a></small>
                                                         </div>
                                                         <div class="form-group col-md-12">
                                                             <label>New Password <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="npassword" type="password">
+                                                            <input required="" class="form-control square" id="newPassword" name="newPassword" type="password" disabled>
                                                         </div>
                                                         <div class="form-group col-md-12">
                                                             <label>Confirm Password <span class="required">*</span></label>
-                                                            <input required="" class="form-control square" name="cpassword" type="password">
+                                                            <input required="" class="form-control square" name="cpassword" type="password" disabled>
                                                         </div>
+                                                        
                                                         <div class="col-md-12">
                                                             <button type="submit" class="btn btn-fill-out submit" name="submit" value="Submit">Save</button>
                                                         </div>
@@ -206,5 +233,45 @@
 
 
     <script>
+function checkCurrentPassword() {
+    var currentPassword = document.getElementById("currentPassword").value;
+    var newPasswordField = document.getElementById("newPassword");
+    var confirmPasswordField = document.getElementsByName("cpassword")[0];
+
+    // Enable the new password field if the current password is not empty
+    if (currentPassword.trim() !== "") {
+        newPasswordField.disabled = false;
+        confirmPasswordField.disabled = false;
+    } else {
+        // Clear and disable the new password and confirm password fields if the current password is empty
+        newPasswordField.value = "";
+        confirmPasswordField.value = "";
+        newPasswordField.disabled = true;
+        confirmPasswordField.disabled = true;
+    }
+}
+
+
+function loadAccountDetailsForm() {
+    $.ajax({
+        url: '/accountupdate',
+        method: 'GET',
+        dataType: 'json', // Change the dataType to json
+        success: function(response) {
+            console.log("Account details form loaded successfully.");
+            console.log("response:",response);
+            // Insert the HTML response into the #account-detail element
+            $('#Firstname').val(response.User.Firstname); 
+            $('#Lastname').val(response.User.Lastname); 
+            $('#Phone').val(response.User.Phone); 
+            $('#Email').val(response.User.Email); 
+          
+        },
+        error: function(xhr, status, error) {
+            console.error("Error loading account details form:", error);
+        }
+    });
+}
+loadAccountDetailsForm()
 
     </script>

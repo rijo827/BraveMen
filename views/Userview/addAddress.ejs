@@ -1,0 +1,120 @@
+<%-include("../partials/UserHeader")-%>
+        <div class="page-header breadcrumb-wrap">
+            <div class="container">
+                <div class="breadcrumb">
+                    <a href="index.html" rel="nofollow">Home</a>
+                    <span></span> Pages
+                    <span></span> Login /Register
+                </div>
+            </div>
+        </div>
+        <section class="pt-100 pb-150">
+            <div class="container">
+                <div class="row ">
+                    <div class="col-lg-10">
+                        <div class="row">
+                           
+                            <div class="col-lg-4"></div>
+                            <div class="col-lg-7">
+                                <div class="login_wrap widget-taber-content p-30 background-white border-radius-5">
+                                    <div class="padding_eight_all bg-white">
+                                        <div class="heading_s1">
+                                            <h3 class="mb-30">Create Address</h3>
+                                        </div>
+                                        <div>
+                                           <style>
+                                            .succmsg{
+                                                background-color: aquamarine;
+                                                text-align: center;
+                                                color: white;
+                                            }
+                                            .errmsg{
+                                                background-color: rgb(236, 109, 109);
+                                                text-align: center;
+                                                color: white;
+                                            }
+                                            
+                                           </style>
+                                            <% if(errmsg){%>
+                                                <p class="errmsg" id="errmsg"><%= errmsg%></p>
+                                                <%}else{%>
+                                                    <p class="succmsg" id="succmsg"><%= succmsg%></p>
+                                                <%}%>
+                                        </div>
+                                        <p class="mb-50 font-sm">
+                                            Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our privacy policy
+                                        </p>
+                                        <form method="post" action=""  onsubmit=" return validateAddAddressForm()">
+                                            <style>
+                                                small{
+                                                color: red;
+                                            }
+                                            </style>
+                                            <div class="form-group">
+                                                <input type="text"  name="Name" placeholder="Name" id="Name">
+                                                <small id="NameError"></small>
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text"  name="Address" placeholder="Address" id="Address">
+                                                <small id="AddressError"></small>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text"  name="Landmark" placeholder="Landmark" id="Landmark">
+                                                <small id="LandmarkError"></small>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <input type=""  name="City" placeholder="City/District" id="City">
+                                                <small id="CityError"></small>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="input-group">
+                                                  <input type="text" class="form-control"  name="State" placeholder="State" id="State">
+                                                <small id="StateError"></small>
+                                                  <div class="input-group-append">
+                                                  <input type="text" class="form-control"  name="Pincode" placeholder="Pincode" id="Pincode">
+                                                <small id="PincodeError"></small>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            <div class="form-group">
+                                                <input  type="text" name="MobileNumber" placeholder="Mobile Number" id="MobileNumber">
+                                                <small id="MobileNumberError"></small>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <input  type="text" name="AlternativeNumber" placeholder="Alternative Number" id="AlternativeNumber" >
+                                                <small id="AlternativeNumberError"></small>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <select class="form-select" name="AddressType" id="AddressType">
+                                                  <option value="Type of Address">Type of Address</option>
+                                                  <option value="Billing Address">Billing Address</option>
+                                                  <option value="Shipping Address">Shipping Address</option>
+                                                </select>
+                                                <span id="AddressTypeError"></span>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="row justify-content-center">
+                                                    <div class="col-md-6">
+                                                      <div class="form-group text-center">
+                                                        <button type="submit" class="btn btn-fill-out btn-block hover-up" name="login">Create</button>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <%-include("../partials/UserFooter")-%>  

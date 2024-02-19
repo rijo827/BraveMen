@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const catModel = require("../models/categoryModel");
 const productModel = require("../models/ProductModel");
+const addressModel= require("../models/addressModel")
 
 // let generatedOtp = "";
 const transporter = nodemailer.createTransport({
@@ -385,10 +386,13 @@ const userAccountGet = async (req, res) => {
   try {
     let token = req.cookies.jwtusertoken;
     let userID = req.cookies.userID;
+    const err = req.query.err;
+    const msg = req.query.msg;
     if (token && userID) {
       const categroy = await catModel.find({ isActvie: true });
       const user = await userModel.findById(userID)
-      res.render("userAccount", { isAuthenticted: true, categroy: categroy,User:user });
+      res.render("userAccount", { errmsg: msg,
+        succmsg: "", isAuthenticted: true, categroy: categroy,User:user });
       // res.render("home",{isAuthenticted: true})
     } else {
       res.redirect("/login?err=true&msg=Login first to access it");
@@ -494,18 +498,115 @@ const showAbout = async (req,res)=>{
     console.log(error);
   }
 }
+const updateUserGet = async (req, res) => {
+  let userID = req.cookies.userID;
+  const err = req.query.err;
+  const msg = req.query.msg;
+  try {
+      const user = await userModel.findById(userID)
+
+    if (user) {
+      res.json({ success: true, User:user,succmsg:"",errmsg:msg });
+    } else{
+      res.status(404).json({ success: false, message: "User not found", });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
 
 const updateUser = async (req, res) => {
-    
+    console.log("updating User");
   try {
-    let userID = req.cookies.userID;
+    const userID = req.cookies.userID;
+    const { Firstname, Lastname, Phone, currentPassword,newPassword, Email } = req.body;
+const User = await userModel.findById(userID)
+if(User){
+  console.log("its entering user if ");
+  console.log("currentPassword====== ",currentPassword);
+  console.log("User.Password====== ",User.Password);
+  let isTrue=false
+  bcrypt.compare(currentPassword, User.Password, (err, result) => {
+    
+    if (err) {
+      // Handle the error
+      console.error(err);
+  console.log("its entering user err ");
+       
+      res.redirect("/account?err=true&msg=Internal Server Error");
+    }
+    else{
+      console.log("result====<>>>",result);
+      isTrue=result
+    }
+  
+  })
+ if(isTrue&&currentPassword!==newPassword){
+    
+  User.Firstname=Firstname
+  User.Lastname=Lastname
+  User.Phone=Phone
+  User.Password=newPassword
+  User.Email=Email
 
 
+  await User.save()
+  res.redirect('/account')
+  console.log("Updated successfully");
+}
+else{
+  console.log("you Can't Give Same Password");
+    res.redirect("/account?err=true&msg=you Can't Give Same Password");
+}
+ 
+}
 
   } catch (error) {
     console.log(error);
   }
 };
+
+const wishlistLoad = async (req,res)=>{
+  const categroy = await catModel.find({ isActvie: true });
+
+ try {
+  res.render("wishlist",{
+    isAuthenticted: true,
+    categroy: categroy,
+  })
+ } catch (error) {
+  console.log(error);
+ }
+}
+
+
+const addAddressget = async (req,res)=>{
+  const categroy = await catModel.find({ isActvie: true });
+  const err = req.query.err;
+  const msg = req.query.msg;
+  try {
+    if (err) {
+      res.render("addAddress", {
+        succmsg: "",
+        errmsg: msg,
+        isAuthenticted: true,
+        categroy: categroy,
+      });
+    } else {
+      res.render("addAddress", {
+        succmsg: "",
+        errmsg: msg,
+        isAuthenticted: true,
+        categroy: categroy,
+      });
+    }
+    
+  } catch (error) {
+   console.log(error);    
+  }
+}
+
 
 
 module.exports = {
@@ -528,4 +629,7 @@ module.exports = {
   getForgotUserPassword,
   updateUserPassword,
   updateUser,
+  updateUserGet,
+  wishlistLoad,
+  addAddressget,
 };
