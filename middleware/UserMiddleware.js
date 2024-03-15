@@ -41,6 +41,19 @@ console.log("token====>>>",token);
     }
   };
 
+  const isBlocked = async (req,res,next)=>{
+    const userID=req.cookies.userID
+    console.log("userID=====>>>>",userID);
+    try {
+      const User= await userModel.findById(userID)
+      if(User && User.Blocked===true){
+        console.log("User Is Blocked");
+        res.redirect("/blocked")
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
 
   module.exports={

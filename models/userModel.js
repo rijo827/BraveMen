@@ -1,5 +1,7 @@
   const mongoose = require("mongoose");
   const bcrypt = require('bcrypt');
+const {ObjectId} = mongoose.Schema;
+  
 
 const UserSchema = new mongoose.Schema({
   Firstname: {
@@ -26,8 +28,16 @@ const UserSchema = new mongoose.Schema({
     type:Boolean,
     default:false
   },
+  address:{
+    type:ObjectId,
+    ref:"Address",
+},
   jwt_token: {
     type: String
+  },
+  cart:{
+    type:ObjectId,
+    ref:"cartDetails",
   }
 });
 
@@ -41,7 +51,6 @@ UserSchema.pre('save', async function (next) {
           console.log("hashedPassword=====>>>>",hashedPassword);
           console.log("Hashing is working ");
       }else{
-        console.log("hashing not working");
         next();
 
       }

@@ -16,13 +16,19 @@ userroute.get('/accountupdate', userMiddleware.islogin,userControler.updateUserG
 userroute.get('/forgotuserPassword',userMiddleware.islogin, userControler.getForgotUserPassword)
 userroute.post('/resetuserpassword',userMiddleware.islogin, userControler.updateUserPassword)
 userroute.post('/updateuserdetails',userMiddleware.islogin, userControler.updateUser)
+
+
+
 userroute.get('/addaddress',userMiddleware.islogin, userControler.addAddressget)
+userroute.post('/addaddress',userMiddleware.islogin, userControler.addAddress)
 
 
 
 userroute.get('/login', userMiddleware.islogout, userControler.loadLogin)
 userroute.post('/login',userMiddleware.islogout, userControler.loggingUser)
 userroute.get('/logout', userControler.loggoutUser)
+
+
 
 
 

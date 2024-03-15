@@ -390,9 +390,11 @@ const userAccountGet = async (req, res) => {
     const msg = req.query.msg;
     if (token && userID) {
       const categroy = await catModel.find({ isActvie: true });
-      const user = await userModel.findById(userID)
+      const user = await userModel.findById(userID).populate("address")
+      const address= await addressModel.find()
+      console.log("Address=====>>>>>",address);
       res.render("userAccount", { errmsg: msg,
-        succmsg: "", isAuthenticted: true, categroy: categroy,User:user });
+        succmsg: "", isAuthenticted: true, categroy: categroy,User:user, Address:address});
       // res.render("home",{isAuthenticted: true})
     } else {
       res.redirect("/login?err=true&msg=Login first to access it");
@@ -607,7 +609,93 @@ const addAddressget = async (req,res)=>{
   }
 }
 
+const addAddress = async (req,res)=>{
 
+  const {
+    Name,
+    Address,
+    Landmark,
+    City,
+    State,
+    Pincode,
+    MobileNumber,
+    AlternativeNumber,
+    AddressType
+  } =req.body
+  
+   try {
+    const userID = req.cookies.userID;
+   const user = await userModel.findById(userID)
+   if (user) {
+    // Create a new address object
+    const newAddress = new addressModel({
+        Name,
+        Address,
+        Landmark,
+        City,
+        State,
+        Pincode,
+        MobileNumber,
+        AlternativeNumber,
+        AddressType
+    });
+
+    const savedAddress = await newAddress.save();
+
+   
+    user.address = savedAddress._id;
+    await user.save();
+
+    console.log('Address added successfully:', savedAddress);
+
+    
+    res.redirect('/account')
+} else {
+    console.log('User not found.');
+   
+    res.status(404).json({ success: false, message: 'User not found' });
+}
+   } catch (error) {
+    
+   }
+  
+}
+
+
+const addtoCart = async (req,res)=>{
+    
+    const ProductID=req.body.productID
+    const userID= req.cookies.userID
+    console.log("ProducID is" ,ProductID);
+     console.log("userID===>>>",userID);
+  if(userID && ProductID){
+    try {
+      
+      const User=await userModel.findById(userID)
+
+      const product = await productModel.findById(ProductID)
+      
+      if(!User){
+        console.log("USer not found");
+        return res.status(404).json({ message: "User not found" });
+
+      }
+      else{
+        if(!product){
+          console.log("product is not found ");
+        return res.status(404).json({ message: "product not found" });
+
+        }
+        else{
+         
+        }
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+}
 
 module.exports = {
   insertUser,
@@ -632,4 +720,6 @@ module.exports = {
   updateUserGet,
   wishlistLoad,
   addAddressget,
+  addAddress,
+  addtoCart,
 };
