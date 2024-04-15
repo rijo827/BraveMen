@@ -1,0 +1,111 @@
+<%-include("../partials/UserHeader")-%>
+        <section class="pt-100 pb-150">
+            <div class="container">
+                <div class="row ">
+                    <div class="col-lg-10">
+                        <div class="row">
+                           
+                            <div class="col-lg-4"></div>
+                            <div class="col-lg-7">
+                                <div class="login_wrap widget-taber-content p-30 background-white border-radius-5">
+                                    <div class="padding_eight_all bg-white">
+                                        <div class="heading_s1">
+                                            <h3 class="mb-30">Edit Address</h3>
+                                        </div>
+                                        <div>
+                                           <style>
+                                            .succmsg{
+                                                background-color: aquamarine;
+                                                text-align: center;
+                                                color: white;
+                                            }
+                                            .errmsg{
+                                                background-color: rgb(236, 109, 109);
+                                                text-align: center;
+                                                color: white;
+                                            }
+                                            
+                                           </style>
+                                            <% if(errmsg){%>
+                                                <p class="errmsg" id="errmsg"><%= errmsg%></p>
+                                                <%}else{%>
+                                                    <p class="succmsg" id="succmsg"><%= succmsg%></p>
+                                                <%}%>
+                                        </div>
+                                        <p class="mb-50 font-sm">
+                                            Your personal data will be used to support your experience throughout this website, to manage access to your account, and for other purposes described in our privacy policy
+                                        </p>
+                                        <form method="post" action="/editaddress/<%=Address._id %>"  onsubmit=" return validateEditAddressForm()">
+                                            <style>
+                                                small{
+                                                color: red;
+                                            }
+                                            </style>
+                                            <div class="form-group">
+                                                <input type="text"  name="newName" placeholder="Name" id="newName" value="<%=Address.Name%>">
+                                                <small id="newNameError"></small>
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text"  name="newAddress" placeholder="Address" id="newAddress" value="<%=Address.Address%>">
+                                                <small id="newAddressError"></small>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <input type="text"  name="newLandmark" placeholder="Landmark" id="newLandmark" value="<%=Address.Landmark%>" >
+                                                <small id="newLandmarkError"></small>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <input type=""  name="newCity" placeholder="City/District" id="newCity"value="<%=Address.City%>">
+                                                <small id="newCityError"></small>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="input-group">
+                                                  <input type="text" class="form-control"  name="newState" placeholder="State" id="newState" value="<%=Address.State%>">
+                                                <small id="newStateError"></small>
+                                                  <div class="input-group-append">
+                                                  <input type="text" class="form-control"  name="newPincode" placeholder="Pincode" id="newPincode"  value="<%=Address.Pincode%>">
+                                                <small id="newPincodeError"></small>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            <div class="form-group">
+                                                <input  type="text" name="newMobileNumber" placeholder="Mobile Number" id="newMobileNumber" value="<%=Address.MobileNumber%>">
+                                                <small id="newMobileNumberError"></small>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <input  type="text" name="newAlternativeNumber" placeholder="Alternative Number" id="newAlternativeNumber" value="<%=Address.AlternativeNumber%>" >
+                                                <small id="newAlternativeNumberError"></small>
+
+                                            </div>
+                                            <div class="form-group">
+                                                <select class="form-select" name="newAddressType" id="newAddressType">
+                                                  <option value="Type of Address">Type of Address</option>
+                                                  <option <%= Address.AddressType == 'Billing Address' ? 'selected' : '' %> value="Billing Address">Billing Address</option>
+                                                  <option <%= Address.AddressType == 'Shipping Address' ? 'selected' : '' %>  value="Shipping Address">Shipping Address</option>
+                                                </select>
+                                                <span id="newAddressTypeError"></span>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="row justify-content-center">
+                                                    <div class="col-md-6">
+                                                      <div class="form-group text-center">
+                                                        <button type="submit" class="btn btn-fill-out btn-block hover-up" name="login">Save</button>
+                                                      </div>
+                                                    </div>
+                                                  </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                           
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <%-include("../partials/UserFooter")-%>  

@@ -21,6 +21,8 @@ userroute.post('/updateuserdetails',userMiddleware.islogin, userControler.update
 
 userroute.get('/addaddress',userMiddleware.islogin, userControler.addAddressget)
 userroute.post('/addaddress',userMiddleware.islogin, userControler.addAddress)
+userroute.get('/editaddress/:address_id',userMiddleware.islogin, userControler.editAddressGet)
+userroute.post('/editaddress/:address_id',userMiddleware.islogin, userControler.editAddress)
 
 
 

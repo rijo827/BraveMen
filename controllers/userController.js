@@ -661,6 +661,91 @@ const addAddress = async (req,res)=>{
   
 }
 
+const editAddressGet = async (req,res)=>{
+
+  const categroy = await catModel.find({ isActvie: true });
+  const userID = req.cookies.userID;
+  
+  const err = req.query.err;
+  const msg = req.query.msg;
+  try {
+    const User= await userModel.findById(userID)
+    if(User){
+    console.log("WE GOT USER");
+      const addressID= req.params.address_id
+      const address= await addressModel.findById(addressID)
+      if(address){
+    console.log("WE GOT ADDRESS");
+
+        if (err) {
+          res.render("editAddress", {
+            succmsg: "",
+            errmsg: msg,
+            isAuthenticted: true,
+            categroy: categroy,
+            Address:address,
+          });
+        } else {
+          res.render("editAddress", {
+            succmsg: "",
+            errmsg: msg,
+            isAuthenticted: true,
+            categroy: categroy,
+            Address:address,
+          });
+        }
+      }
+    }
+    
+  } catch (error) {
+   console.log(error);    
+  }
+}
+
+const editAddress = async (req,res)=> {
+
+  const {
+    newName,
+    newAddress,
+    newLandmark,
+    newCity,
+    newState,
+    newPincode,
+    newMobileNumber,
+    newAlternativeNumber,
+    newAddressType
+  } =req.body
+
+  try {
+    const userID = req.cookies.userID;
+    const user = await userModel.findById(userID)
+    if(user){
+      const addressID= req.params.address_id
+      const existingAddress = await addressModel.findById(addressID)
+      if(!existingAddress){
+        console.log("ADDRESS NOT FOUND");
+      }
+      
+        existingAddress.Name= newName
+        existingAddress.Address= newAddress
+        existingAddress.Landmark=newLandmark
+        existingAddress.City= newCity
+        existingAddress.State=newState
+        existingAddress.Pincode=newPincode
+        existingAddress.MobileNumber=newMobileNumber
+        existingAddress.AlternativeNumber=newAlternativeNumber
+        existingAddress.AddressType=newAddressType
+        
+        await existingAddress.save()
+        console.log("ADDRESS UPDATED SUCCESSFULLY");
+        res.redirect("/account")
+      
+    }
+    
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 const addtoCart = async (req,res)=>{
     
@@ -721,5 +806,7 @@ module.exports = {
   wishlistLoad,
   addAddressget,
   addAddress,
+  editAddressGet,
+  editAddress,
   addtoCart,
 };
