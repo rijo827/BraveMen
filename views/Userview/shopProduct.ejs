@@ -73,7 +73,13 @@
                                         <div class="product-action-1">
                                             <a aria-label="Quick view" class="action-btn hover-up" data-bs-toggle="modal" data-bs-target="#quickViewModal">
                                             <i class="fi-rs-search"></i></a>
-                                            <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+                                            <a aria-label="Add To Wishlist" class="action-btn hover-up add-to-wishlist <% if (product.isInWishlist) { %>disabled<% } %>" href="#" data-product-id="<%= product._id %>">
+                                                <% if (product.isInWishlist) { %>
+                                                    <i class="fi-rs-check"></i>
+                                                  <% } else { %>
+                                                    <i class="fi-rs-heart"></i>
+                                                  <% } %>
+                                            </a>
                                             <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
                                         </div>
                                         <div class="product-badges product-badges-position product-badges-mrg">
@@ -232,3 +238,49 @@
         </section>
     </main>
     <%-include("../partials/UserFooter")-%>  
+
+
+    <!-- WISHLIST POST -->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          document.querySelectorAll(".add-to-wishlist").forEach(button => {
+            button.addEventListener("click", async (event) => {
+              event.preventDefault();
+              const button = event.currentTarget;
+              const productID = button.dataset.productId;
+      
+              try {
+                const response = await fetch(`/addwishlist/${productID}`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  credentials: 'include' // To include cookies
+                });
+      
+                const result = await response.json();
+                if (response.ok) {
+                  alert(result.message);
+                  // Change button to indicate success and disable it
+                  button.innerHTML = '<i class="fi-rs-check"></i>';
+                  button.classList.add('disabled');
+                  button.disabled = true;
+                } else {
+                  alert(`Error: ${result.message}`);
+                  if (response.status === 400) {
+                    // If the product is already in the wishlist, indicate success and disable the button
+                    button.innerHTML = '<i class="fi-rs-check"></i>';
+                    button.classList.add('disabled');
+                    button.disabled = true;
+                  }
+                }
+              } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while adding to wishlist.');
+              }
+            });
+          });
+        });
+      </script>
+      

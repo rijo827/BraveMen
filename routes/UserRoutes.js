@@ -23,6 +23,7 @@ userroute.get('/addaddress',userMiddleware.islogin, userControler.addAddressget)
 userroute.post('/addaddress',userMiddleware.islogin, userControler.addAddress)
 userroute.get('/editaddress/:address_id',userMiddleware.islogin, userControler.editAddressGet)
 userroute.post('/editaddress/:address_id',userMiddleware.islogin, userControler.editAddress)
+userroute.post('/deleteaddress',userMiddleware.islogin, userControler.deleteAddress)
 
 
 
@@ -31,10 +32,12 @@ userroute.post('/login',userMiddleware.islogout, userControler.loggingUser)
 userroute.get('/logout', userControler.loggoutUser)
 
 
+userroute.get('/cart',userMiddleware.islogin,userControler.showCart)
 
 
 
 userroute.get('/wishlist',userMiddleware.islogin,userControler.wishlistLoad)
+userroute.post('/addwishlist/:product_id',userMiddleware.islogin,userControler.addwishlist)
 
 userroute.get('/forgotPassword',userMiddleware.islogout, userControler.forgotPassword)
 userroute.post('/reset',userMiddleware.islogout, userControler.updatePassword)

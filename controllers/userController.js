@@ -5,7 +5,9 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const catModel = require("../models/categoryModel");
 const productModel = require("../models/ProductModel");
-const addressModel= require("../models/addressModel")
+const addressModel = require("../models/addressModel");
+const wishlistModel = require("../models/wishlistModel");
+const cartModel = require("../models/cartModel");
 
 // let generatedOtp = "";
 const transporter = nodemailer.createTransport({
@@ -105,7 +107,10 @@ const updatePassword = async (req, res) => {
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-        await userModel.updateOne({ Email: Email }, { Password: hashedPassword });
+        await userModel.updateOne(
+          { Email: Email },
+          { Password: hashedPassword }
+        );
 
         console.log("Password updated successfully");
         res.redirect("/login");
@@ -174,7 +179,10 @@ const updateUserPassword = async (req, res) => {
 
     if (user) {
       // Compare the provided password with the hashed password in the database
-      const isPasswordMatch = await bcrypt.compare(updatePassword, user.Password);
+      const isPasswordMatch = await bcrypt.compare(
+        updatePassword,
+        user.Password
+      );
 
       if (isPasswordMatch) {
         console.log("You can't use the same password");
@@ -183,9 +191,12 @@ const updateUserPassword = async (req, res) => {
         );
       } else {
         const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(updatePassword , saltRounds);
+        const hashedPassword = await bcrypt.hash(updatePassword, saltRounds);
 
-        await userModel.updateOne({ Email: Email }, { Password: hashedPassword });
+        await userModel.updateOne(
+          { Email: Email },
+          { Password: hashedPassword }
+        );
 
         console.log("Password updated successfully");
         res.redirect("/account");
@@ -363,22 +374,29 @@ const loggingUser = async (req, res) => {
 const loadhome = async (req, res) => {
   // let user = req.session.userID;
   let user = req.cookies?.jwtusertoken;
-  let userID = req.cookies  .userID;
+  let userID = req.cookies.userID;
   console.log("userId >>>>>>", userID);
   let categroy = await catModel.find({ isActvie: true });
   let product = await productModel
-  .find({ isActive: false, isDeleted: false })
-  .populate("category");
+    .find({ isActive: false, isDeleted: false })
+    .populate("category");
 
   if (user && userID) {
     let thisUser = await userModel.findById(userID);
 
     console.log("User name>>>>", thisUser.Firstname);
-    res.render("home", { isAuthenticted: true, categroy: categroy,
-      products: product,});
+    res.render("home", {
+      isAuthenticted: true,
+      categroy: categroy,
+      products: product,
+    });
   } else {
     console.log("its else");
-    res.render("home", { isAuthenticted: false, categroy: categroy, products: product });
+    res.render("home", {
+      isAuthenticted: false,
+      categroy: categroy,
+      products: product,
+    });
   }
 };
 
@@ -390,11 +408,17 @@ const userAccountGet = async (req, res) => {
     const msg = req.query.msg;
     if (token && userID) {
       const categroy = await catModel.find({ isActvie: true });
-      const user = await userModel.findById(userID).populate("address")
-      const address= await addressModel.find()
-      console.log("Address=====>>>>>",address);
-      res.render("userAccount", { errmsg: msg,
-        succmsg: "", isAuthenticted: true, categroy: categroy,User:user, Address:address});
+      const user = await userModel.findById(userID).populate("address");
+      const address = await addressModel.find({ isDeleted: false });
+      console.log("Address=====>>>>>", address);
+      res.render("userAccount", {
+        errmsg: msg,
+        succmsg: "",
+        isAuthenticted: true,
+        categroy: categroy,
+        User: user,
+        Address: address,
+      });
       // res.render("home",{isAuthenticted: true})
     } else {
       res.redirect("/login?err=true&msg=Login first to access it");
@@ -414,54 +438,97 @@ const loggoutUser = async (req, res) => {
 
 const showShop = async (req, res) => {
   try {
-    let categroy = await catModel.find({ isActvie: true });
-    let product = await productModel
+    const userID = req.cookies.userID;
+    const categroy = await catModel.find({ isActvie: true });
+    const products = await productModel
       .find({ isActive: false, isDeleted: false })
       .populate("category");
 
+    let wishlistProductIds = [];
+    if (userID) {
+      const userWishlist = await wishlistModel.find({ User: userID }).lean();
+      wishlistProductIds = userWishlist.map(item => item.Product.toString());
+    }
+
+    const productsWithWishlistStatus = products.map(product => {
+      return {
+        ...product.toObject(),
+        isInWishlist: wishlistProductIds.includes(product._id.toString())
+      };
+    });
+
     res.render("shopProduct", {
       isAuthenticted: true,
       categroy: categroy,
-      products: product,
+      products: productsWithWishlistStatus,
     });
   } catch (error) {
     console.log(error);
   }
 };
-
 const showSpecial = async (req, res) => {
   try {
-    let categroy = await catModel.find({ isActvie: true });
-    let product = await productModel
+    const userID = req.cookies.userID;
+    const categroy = await catModel.find({ isActvie: true });
+    const products = await productModel
       .find({ isActive: false, isDeleted: false, type: "Special" })
       .populate("category");
 
+    let wishlistProductIds = [];
+    if (userID) {
+      const userWishlist = await wishlistModel.find({ User: userID }).lean();
+      wishlistProductIds = userWishlist.map(item => item.Product.toString());
+    }
+
+    const productsWithWishlistStatus = products.map(product => {
+      return {
+        ...product.toObject(),
+        isInWishlist: wishlistProductIds.includes(product._id.toString())
+      };
+    });
+
     res.render("shopProduct", {
       isAuthenticted: true,
       categroy: categroy,
-      products: product,
+      products: productsWithWishlistStatus,
     });
   } catch (error) {
     console.log(error);
   }
 };
+
 
 const showParty = async (req, res) => {
   try {
-    let categroy = await catModel.find({ isActvie: true });
-    let product = await productModel
+    const userID = req.cookies.userID;
+    const categroy = await catModel.find({ isActvie: true });
+    const products = await productModel
       .find({ isActive: false, isDeleted: false, type: "Party" })
       .populate("category");
+
+    let wishlistProductIds = [];
+    if (userID) {
+      const userWishlist = await wishlistModel.find({ User: userID }).lean();
+      wishlistProductIds = userWishlist.map(item => item.Product.toString());
+    }
+
+    const productsWithWishlistStatus = products.map(product => {
+      return {
+        ...product.toObject(),
+        isInWishlist: wishlistProductIds.includes(product._id.toString())
+      };
+    });
 
     res.render("shopProduct", {
       isAuthenticted: true,
       categroy: categroy,
-      products: product,
+      products: productsWithWishlistStatus,
     });
   } catch (error) {
     console.log(error);
   }
 };
+
 
 const showProductDetails = async (req, res) => {
   try {
@@ -487,9 +554,7 @@ const showProductDetails = async (req, res) => {
   }
 };
 
-
-
-const showAbout = async (req,res)=>{
+const showAbout = async (req, res) => {
   const categroy = await catModel.find({ isActvie: true });
   try {
     res.render("page-about", {
@@ -499,18 +564,18 @@ const showAbout = async (req,res)=>{
   } catch (error) {
     console.log(error);
   }
-}
+};
 const updateUserGet = async (req, res) => {
   let userID = req.cookies.userID;
   const err = req.query.err;
   const msg = req.query.msg;
   try {
-      const user = await userModel.findById(userID)
+    const user = await userModel.findById(userID);
 
     if (user) {
-      res.json({ success: true, User:user,succmsg:"",errmsg:msg });
-    } else{
-      res.status(404).json({ success: false, message: "User not found", });
+      res.json({ success: true, User: user, succmsg: "", errmsg: msg });
+    } else {
+      res.status(404).json({ success: false, message: "User not found" });
     }
   } catch (error) {
     console.error(error);
@@ -519,71 +584,63 @@ const updateUserGet = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-    console.log("updating User");
+  console.log("updating User");
   try {
     const userID = req.cookies.userID;
-    const { Firstname, Lastname, Phone, currentPassword,newPassword, Email } = req.body;
-const User = await userModel.findById(userID)
-if(User){
-  console.log("its entering user if ");
-  console.log("currentPassword====== ",currentPassword);
-  console.log("User.Password====== ",User.Password);
-  let isTrue=false
-  bcrypt.compare(currentPassword, User.Password, (err, result) => {
-    
-    if (err) {
-      // Handle the error
-      console.error(err);
-  console.log("its entering user err ");
-       
-      res.redirect("/account?err=true&msg=Internal Server Error");
+    const { Firstname, Lastname, Phone, currentPassword, newPassword, Email } =
+      req.body;
+    const User = await userModel.findById(userID);
+    if (User) {
+      console.log("its entering user if ");
+      console.log("currentPassword====== ", currentPassword);
+      console.log("User.Password====== ", User.Password);
+      let isTrue = false;
+      bcrypt.compare(currentPassword, User.Password, (err, result) => {
+        if (err) {
+          // Handle the error
+          console.error(err);
+          console.log("its entering user err ");
+
+          res.redirect("/account?err=true&msg=Internal Server Error");
+        } else {
+          console.log("result====<>>>", result);
+          isTrue = result;
+        }
+      });
+      if (isTrue && currentPassword !== newPassword) {
+        User.Firstname = Firstname;
+        User.Lastname = Lastname;
+        User.Phone = Phone;
+        User.Password = newPassword;
+        User.Email = Email;
+
+        await User.save();
+        res.redirect("/account");
+        console.log("Updated successfully");
+      } else {
+        console.log("you Can't Give Same Password");
+        res.redirect("/account?err=true&msg=you Can't Give Same Password");
+      }
     }
-    else{
-      console.log("result====<>>>",result);
-      isTrue=result
-    }
-  
-  })
- if(isTrue&&currentPassword!==newPassword){
-    
-  User.Firstname=Firstname
-  User.Lastname=Lastname
-  User.Phone=Phone
-  User.Password=newPassword
-  User.Email=Email
-
-
-  await User.save()
-  res.redirect('/account')
-  console.log("Updated successfully");
-}
-else{
-  console.log("you Can't Give Same Password");
-    res.redirect("/account?err=true&msg=you Can't Give Same Password");
-}
- 
-}
-
   } catch (error) {
     console.log(error);
   }
 };
 
-const wishlistLoad = async (req,res)=>{
+const wishlistLoad = async (req, res) => {
   const categroy = await catModel.find({ isActvie: true });
 
- try {
-  res.render("wishlist",{
-    isAuthenticted: true,
-    categroy: categroy,
-  })
- } catch (error) {
-  console.log(error);
- }
-}
+  try {
+    res.render("wishlist", {
+      isAuthenticted: true,
+      categroy: categroy,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
 
-
-const addAddressget = async (req,res)=>{
+const addAddressget = async (req, res) => {
   const categroy = await catModel.find({ isActvie: true });
   const err = req.query.err;
   const msg = req.query.msg;
@@ -603,14 +660,12 @@ const addAddressget = async (req,res)=>{
         categroy: categroy,
       });
     }
-    
   } catch (error) {
-   console.log(error);    
+    console.log(error);
   }
-}
+};
 
-const addAddress = async (req,res)=>{
-
+const addAddress = async (req, res) => {
   const {
     Name,
     Address,
@@ -620,15 +675,15 @@ const addAddress = async (req,res)=>{
     Pincode,
     MobileNumber,
     AlternativeNumber,
-    AddressType
-  } =req.body
-  
-   try {
+    AddressType,
+  } = req.body;
+
+  try {
     const userID = req.cookies.userID;
-   const user = await userModel.findById(userID)
-   if (user) {
-    // Create a new address object
-    const newAddress = new addressModel({
+    const user = await userModel.findById(userID);
+    if (user) {
+      // Create a new address object
+      const newAddress = new addressModel({
         Name,
         Address,
         Landmark,
@@ -637,45 +692,39 @@ const addAddress = async (req,res)=>{
         Pincode,
         MobileNumber,
         AlternativeNumber,
-        AddressType
-    });
+        AddressType,
+      });
 
-    const savedAddress = await newAddress.save();
+      const savedAddress = await newAddress.save();
 
-   
-    user.address = savedAddress._id;
-    await user.save();
+      user.address = savedAddress._id;
+      await user.save();
 
-    console.log('Address added successfully:', savedAddress);
+      console.log("Address added successfully:", savedAddress);
 
-    
-    res.redirect('/account')
-} else {
-    console.log('User not found.');
-   
-    res.status(404).json({ success: false, message: 'User not found' });
-}
-   } catch (error) {
-    
-   }
-  
-}
+      res.redirect("/account");
+    } else {
+      console.log("User not found.");
 
-const editAddressGet = async (req,res)=>{
+      res.status(404).json({ success: false, message: "User not found" });
+    }
+  } catch (error) {}
+};
 
+const editAddressGet = async (req, res) => {
   const categroy = await catModel.find({ isActvie: true });
   const userID = req.cookies.userID;
-  
+
   const err = req.query.err;
   const msg = req.query.msg;
   try {
-    const User= await userModel.findById(userID)
-    if(User){
-    console.log("WE GOT USER");
-      const addressID= req.params.address_id
-      const address= await addressModel.findById(addressID)
-      if(address){
-    console.log("WE GOT ADDRESS");
+    const User = await userModel.findById(userID);
+    if (User) {
+      console.log("WE GOT USER");
+      const addressID = req.params.address_id;
+      const address = await addressModel.findById(addressID);
+      if (address) {
+        console.log("WE GOT ADDRESS");
 
         if (err) {
           res.render("editAddress", {
@@ -683,7 +732,7 @@ const editAddressGet = async (req,res)=>{
             errmsg: msg,
             isAuthenticted: true,
             categroy: categroy,
-            Address:address,
+            Address: address,
           });
         } else {
           res.render("editAddress", {
@@ -691,19 +740,17 @@ const editAddressGet = async (req,res)=>{
             errmsg: msg,
             isAuthenticted: true,
             categroy: categroy,
-            Address:address,
+            Address: address,
           });
         }
       }
     }
-    
   } catch (error) {
-   console.log(error);    
+    console.log(error);
   }
-}
+};
 
-const editAddress = async (req,res)=> {
-
+const editAddress = async (req, res) => {
   const {
     newName,
     newAddress,
@@ -713,66 +760,77 @@ const editAddress = async (req,res)=> {
     newPincode,
     newMobileNumber,
     newAlternativeNumber,
-    newAddressType
-  } =req.body
+    newAddressType,
+  } = req.body;
 
   try {
     const userID = req.cookies.userID;
-    const user = await userModel.findById(userID)
-    if(user){
-      const addressID= req.params.address_id
-      const existingAddress = await addressModel.findById(addressID)
-      if(!existingAddress){
+    const user = await userModel.findById(userID);
+    if (user) {
+      const addressID = req.params.address_id;
+      const existingAddress = await addressModel.findById(addressID);
+      if (!existingAddress) {
         console.log("ADDRESS NOT FOUND");
       }
-      
-        existingAddress.Name= newName
-        existingAddress.Address= newAddress
-        existingAddress.Landmark=newLandmark
-        existingAddress.City= newCity
-        existingAddress.State=newState
-        existingAddress.Pincode=newPincode
-        existingAddress.MobileNumber=newMobileNumber
-        existingAddress.AlternativeNumber=newAlternativeNumber
-        existingAddress.AddressType=newAddressType
-        
-        await existingAddress.save()
-        console.log("ADDRESS UPDATED SUCCESSFULLY");
-        res.redirect("/account")
-      
+
+      existingAddress.Name = newName;
+      existingAddress.Address = newAddress;
+      existingAddress.Landmark = newLandmark;
+      existingAddress.City = newCity;
+      existingAddress.State = newState;
+      existingAddress.Pincode = newPincode;
+      existingAddress.MobileNumber = newMobileNumber;
+      existingAddress.AlternativeNumber = newAlternativeNumber;
+      existingAddress.AddressType = newAddressType;
+
+      await existingAddress.save();
+      console.log("ADDRESS UPDATED SUCCESSFULLY");
+      res.redirect("/account");
     }
-    
   } catch (error) {
     console.log(error);
   }
-}
+};
 
-const addtoCart = async (req,res)=>{
-    
-    const ProductID=req.body.productID
-    const userID= req.cookies.userID
-    console.log("ProducID is" ,ProductID);
-     console.log("userID===>>>",userID);
-  if(userID && ProductID){
+const deleteAddress = async (req, res) => {
+  console.log("deleteingg......");
+  const addressID = req.body.addressID;
+  console.log("addressID>>>>>>", addressID);
+  const address = await addressModel.findById(addressID);
+  try {
+    if (address) {
+      console.log("address>>>>>", address);
+      address.isDeleted = true;
+      await address.save();
+      console.log("Deleted Successfully.....");
+      return res.json({
+        success: true,
+        isAuthenticted: true,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+const addtoCart = async (req, res) => {
+  const ProductID = req.body.productID;
+  const userID = req.cookies.userID;
+  console.log("ProducID is", ProductID);
+  console.log("userID===>>>", userID);
+  if (userID && ProductID) {
     try {
-      
-      const User=await userModel.findById(userID)
+      const User = await userModel.findById(userID);
 
-      const product = await productModel.findById(ProductID)
-      
-      if(!User){
+      const product = await productModel.findById(ProductID);
+
+      if (!User) {
         console.log("USer not found");
         return res.status(404).json({ message: "User not found" });
-
-      }
-      else{
-        if(!product){
+      } else {
+        if (!product) {
           console.log("product is not found ");
-        return res.status(404).json({ message: "product not found" });
-
-        }
-        else{
-         
+          return res.status(404).json({ message: "product not found" });
+        } else {
         }
       }
     } catch (error) {
@@ -780,7 +838,61 @@ const addtoCart = async (req,res)=>{
       res.status(500).json({ message: "Internal server error" });
     }
   }
+};
+
+const showCart= async (req, res) => {
+
+  const categroy = await catModel.find({ isActvie: true });  
+    try {
+      res.render("cart", {
+        isAuthenticted: true,
+        categroy: categroy,
+       
+      });
+
+    } catch (error) {
+      console.log(error);
+    
+  }
 }
+
+const addwishlist = async (req, res) => {
+  try {
+    const ProductID = req.params.product_id;
+    const userID = req.cookies.userID;
+    console.log("ProductID is", ProductID);
+    console.log("userID===>>>", userID);
+
+    const User = await userModel.findById(userID);
+    if (User) {
+      const Product = await productModel.findById(ProductID);
+      if (Product) {
+        const existingWishlistItem = await wishlistModel.findOne({ User: userID, Product: ProductID });
+        if (existingWishlistItem) {
+          return res.status(400).json({ message: "Product is already in the wishlist" });
+        } else {
+          const wishlist = new wishlistModel({
+            User: userID, // Assuming you want to associate wishlist with the user
+            Product: ProductID,
+            createdOn: new Date()
+          });
+          await wishlist.save();
+          console.log("wishlist added successfully");
+          return res.status(200).json({ message: "Wishlist added successfully" });
+        }
+      } else {
+        return res.status(404).json({ message: "Product not found" });
+      }
+    } else {
+      return res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    console.error("Error adding to wishlist:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
 
 module.exports = {
   insertUser,
@@ -808,5 +920,8 @@ module.exports = {
   addAddress,
   editAddressGet,
   editAddress,
+  deleteAddress,
   addtoCart,
+  showCart,
+  addwishlist,
 };

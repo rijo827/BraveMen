@@ -127,8 +127,8 @@
                                               </div>
 
                                               <% Address.forEach(function(address) { %>
-                                            <div class="col-lg-6">  
-                                                <div class="card mb-3 mb-lg-1">
+                                            <div class="col-lg-6" id="addressCount_<%= address._id %>" >  
+                                                <div class="card mb-3 mb-lg-1" >
 
                                                     <div class="card-header">
                                                         <h5 class="mb-0"><%=address.AddressType%></h5>
@@ -137,8 +137,8 @@
                                                         <address><%=address.Name%><br><%=address.Address%><br> <%=address.City%> <br><%=address.State%><br><%=address.Landmark%> <br><%=address.MobileNumber%> <br></address>
                                                         <p><%=address.Pincode%></p>
                                                         <div style="display: flex; justify-content: space-evenly;">
-                                                        <a  class="btn-small btn-info rounded-pill text-white px-3 border-0" href="/editaddress/<%=address._id %>">Edit</ad>
-                                                        <a  class="btn-small btn-danger rounded-pill text-white px-3 border-0">Delete</a>
+                                                        <a  class="btn-small btn-info rounded-pill text-white px-3 border-0" href="/editaddress/<%=address._id %>">Edit</a>
+                                                        <a  class="btn-small btn-danger rounded-pill text-white px-3 border-0 delete-address" data-address="<%= address._id %>">Delete</a>
                                                         </div>
                                                         
                                                     </div>
@@ -267,6 +267,34 @@ function loadAccountDetailsForm() {
         }
     });
 }
+
+$(document).ready(function() {
+  $('.delete-address').on('click', function(event) {
+    event.preventDefault();
+console.log("deleteing.......");
+    const addressToDelete = $(this).data('address');
+console.log("addressToDelete.......",addressToDelete);
+
+    alert(addressToDelete);
+
+    $.ajax({
+      url: '/deleteaddress',
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify({ addressID: addressToDelete }),
+      success: function(response) {
+        console.log(response);
+
+        // Assuming you have an element with an ID like "product_" + productToDelete
+        $("#addressCount_"+ addressToDelete).remove();
+      },
+      error: function(error) {
+        console.error(error);
+      }
+    });
+  });
+});
+
 loadAccountDetailsForm()
 
     </script>

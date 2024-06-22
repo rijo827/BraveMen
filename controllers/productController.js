@@ -215,7 +215,7 @@ const addProduct = async (req, res) => {
 };
 
 const deleteOneProduct = async (req, res) => {
-  console.log("deleteingg......");
+  console.log("deleteingg......");  
   const productname = req.body.productName;
 
   const product = await ProductModel.findById(productname);
