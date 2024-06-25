@@ -266,6 +266,7 @@
                   button.innerHTML = '<i class="fi-rs-check"></i>';
                   button.classList.add('disabled');
                   button.disabled = true;
+                updateWishlistCount();
                 } else {
                   alert(`Error: ${result.message}`);
                   if (response.status === 400) {
@@ -281,6 +282,30 @@
               }
             });
           });
+
         });
+        // $(document).ready(function() {
+        function updateWishlistCount() {
+            $.ajax({
+                url: '/wishlistcount',
+                method: 'GET',
+                success: function(response) {
+                    const wishlistCountElement = $('#wishlist-count');
+                    if (response.Count > 0) {
+                        wishlistCountElement.text(response.Count);
+                        wishlistCountElement.show();
+                    } else {
+                        wishlistCountElement.hide();
+                    }
+                },
+                error: function(error) {
+                    console.error('Error fetching wishlist count:', error);
+                }
+            });
+        }
+
+        // Update wishlist count on page load
+        // updateWishlistCount();
+    // });
       </script>
       

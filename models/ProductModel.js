@@ -79,7 +79,11 @@ const productSchema = new mongoose.Schema({
 
         type:Boolean,
         default:false
-      }
+      },
+      inStock:{
+        type:Boolean,
+        default:true  
+      },
 
 })
 module.exports = mongoose.model("ProductDetails", productSchema,"ProductDetails");

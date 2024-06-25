@@ -627,18 +627,7 @@ const updateUser = async (req, res) => {
   }
 };
 
-const wishlistLoad = async (req, res) => {
-  const categroy = await catModel.find({ isActvie: true });
 
-  try {
-    res.render("wishlist", {
-      isAuthenticted: true,
-      categroy: categroy,
-    });
-  } catch (error) {
-    console.log(error);
-  }
-};
 
 const addAddressget = async (req, res) => {
   const categroy = await catModel.find({ isActvie: true });
@@ -891,8 +880,74 @@ const addwishlist = async (req, res) => {
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+const wishlistLoad = async (req, res) => {
+
+  const userID = req.cookies.userID;
+
+  const categroy = await catModel.find({ isActvie: true });
+  const User= await userModel.findById(userID);
+
+  
+  try {
+    if(User){
+      const wishlistItems = await wishlistModel.find({ User: userID }).populate("Product");
+      console.log("wishlistproduct>>>>", wishlistItems);
+      res.render("wishlist", {
+        isAuthenticted: true,
+        categroy: categroy,
+        wishlistItems: wishlistItems,
+        
+      });
+    }
+    
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("An error occurred while loading the wishlist");
+  }
+};
+
+const removeWishlist = async (req, res) => {
+  try {
+    const userID = req.cookies.userID;
+    const ProductID = req.params.product_id;
+
+   
+    const User = await userModel.findById(userID);
+
+    if (User) {
+
+   
+      await wishlistModel.findOneAndDelete({ User: userID, Product: ProductID });
+      const wishlistItems = await wishlistModel.find({ User: userID }).populate("Product");
+
+      console.log("Item removed from wishlist successfully");
+
+      res.json({ success: true, message: "Item removed from wishlist successfully",wishlist: wishlistItems });
+    } else {
+      res.status(404).json({ success: false, message: "User not found" });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Failed to remove item from wishlist" });
+  }
+};
 
 
+const wishlistCount = async (req, res) => {
+  
+  try {
+    const userID = req.cookies.userID;
+    const User= await userModel.findById(userID);
+    if(User){
+      const wishlistItems = await wishlistModel.find({ User: userID }).populate("Product");
+      res.json({ Count: wishlistItems.length ,isAuthenticted: true, success: true});
+    }
+   
+  } catch (error) {
+    console.log(error);
+  }
+  
+};
 
 module.exports = {
   insertUser,
@@ -924,4 +979,6 @@ module.exports = {
   addtoCart,
   showCart,
   addwishlist,
+  removeWishlist,
+  wishlistCount,
 };

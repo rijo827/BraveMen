@@ -38,6 +38,8 @@ userroute.get('/cart',userMiddleware.islogin,userControler.showCart)
 
 userroute.get('/wishlist',userMiddleware.islogin,userControler.wishlistLoad)
 userroute.post('/addwishlist/:product_id',userMiddleware.islogin,userControler.addwishlist)
+userroute.post('/removewishlist/:product_id',userMiddleware.islogin,userControler.removeWishlist)
+userroute.get('/wishlistcount',userMiddleware.islogin,userControler.wishlistCount)
 
 userroute.get('/forgotPassword',userMiddleware.islogout, userControler.forgotPassword)
 userroute.post('/reset',userMiddleware.islogout, userControler.updatePassword)
