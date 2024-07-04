@@ -16,10 +16,7 @@ const wishlistSchema= new mongoose.Schema({
     createdOn:{
         type:Date,
       },
-      isDeleted:{
-        type:Boolean,
-        default:false,
-      }
+     
 
 })
 

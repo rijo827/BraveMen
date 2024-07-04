@@ -5,7 +5,7 @@
   <div class="container">
     <div class="row">
       <div class="col-12">
-        <div class="table-responsive">
+        <div class="table-responsive" >
           <table class="table shopping-summery text-center" id="wishlist-table">
             <thead>
               <tr class="main-heading">
@@ -20,6 +20,7 @@
               <% if (wishlistItems.length === 0) { %>
                 <tr >
                   <td colspan="6">Your wishlist is empty.</td>
+          
                 </tr>
               <% } else { %>
                 <% wishlistItems.forEach(function(item) { %>
@@ -42,26 +43,24 @@
                         <span class="color3 font-weight-bold">In Stock</span>
                       <% } else { %>
                         <span class="text-danger font-weight-bold">Out of stock</span>
-                      <% } %>
+                      <% } %> 
                     </td>
                     <td class="text-right" data-title="Cart">
                       <% if (item.Product.inStock) { %>
-                        <button class="btn btn-sm"><i class="fi-rs-shopping-bag mr-5"></i>Add to cart</button>
-                      <% } else { %>
+                        <button class="btn btn-sm add-to-cart-btn" data-product-id="<%= item.Product._id %> "><i class="fi-rs-shopping-bag mr-5"></i>Add to cart</button>
+                      <% } else { %> 
                         <button class="btn btn-sm btn-secondary"><i class="fi-rs-headset mr-5"></i>Contact Us</button>
                       <% } %>
                     </td>
                     <td class="action">
-                      <button class="btn btn-sm remove-wishlist-item " data-wishlist-id="<%=item.Product._id %>">
-                        <i class="fi-rs-trash"></i> 
-                      </button>
+                      <a href="#" class="text-muted remove-wishlist-item" data-wishlist-id="<%=item.Product._id %>"><i class="fi-rs-trash"></i></a>
                     </td>
                     </tr>
                 <% }); %>
               <% } %>
             </tbody>
           </table>
-          <div id="wishlist-empty">
+          <div id="wishlist-empty" style="display: none;">
             <p>Your Wishlist is empty</p>
           </div>
         </div>
@@ -126,4 +125,58 @@
 
    
   });
+
+  document.addEventListener('DOMContentLoaded', function() {
+  const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+
+  addToCartButtons.forEach(button => {
+    button.addEventListener('click', function(event) {
+      event.preventDefault();
+      
+      const productID = this.getAttribute('data-product-id');
+      console.log('Product ID:', productID);
+
+      // Send AJAX request to add the product to the cart
+      fetch('/addtocart/',{
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productID: productID, quantity: 1 }) // You can customize the quantity as needed
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Product added to cart successfully!');
+          updateCartCount()
+          // Optionally update the cart UI here
+        } else {
+          alert(data.message || 'Failed to add product to cart.');
+        }
+      })
+      .catch(error => {
+        console.error('Error adding product to cart:', error);
+        alert('An error occurred. Please try again.');
+      });
+    });
+  });
+});
+function updateCartCount() {
+        $.ajax({
+            url: '/cartcount',
+            method: 'GET',
+            success: function(response) {
+                const cartCountElement = $('#cart-count');
+                if (response.Count > 0) {
+                    cartCountElement.text(response.Count);
+                    cartCountElement.show();
+                } else {
+                    cartCountElement.hide();
+                }
+            },
+            error: function(error) {
+                console.error('Error fetching cart count:', error);
+            }
+        });
+    }
 </script>

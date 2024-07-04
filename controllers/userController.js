@@ -372,31 +372,48 @@ const loggingUser = async (req, res) => {
 };
 
 const loadhome = async (req, res) => {
-  // let user = req.session.userID;
   let user = req.cookies?.jwtusertoken;
   let userID = req.cookies.userID;
   console.log("userId >>>>>>", userID);
-  let categroy = await catModel.find({ isActvie: true });
-  let product = await productModel
-    .find({ isActive: false, isDeleted: false })
-    .populate("category");
 
-  if (user && userID) {
-    let thisUser = await userModel.findById(userID);
+  try {
+    let categroy = await catModel.find({ isActvie: true });
+    let products = await productModel
+      .find({ isActive: false, isDeleted: false })
+      .populate("category");
 
-    console.log("User name>>>>", thisUser.Firstname);
-    res.render("home", {
-      isAuthenticted: true,
-      categroy: categroy,
-      products: product,
+    let wishlistProductIds = [];
+    if (userID) {
+      const userWishlist = await wishlistModel.find({ User: userID }).lean();
+      wishlistProductIds = userWishlist.map((item) => item.Product.toString());
+    }
+
+    const productsWithWishlistStatus = products.map((product) => {
+      return {
+        ...product.toObject(),
+        isInWishlist: wishlistProductIds.includes(product._id.toString()),
+      };
     });
-  } else {
-    console.log("its else");
-    res.render("home", {
-      isAuthenticted: false,
-      categroy: categroy,
-      products: product,
-    });
+
+    if (user && userID) {
+      let thisUser = await userModel.findById(userID);
+      console.log("User name>>>>", thisUser.Firstname);
+      res.render("home", {
+        isAuthenticted: true,
+        categroy: categroy,
+        products: productsWithWishlistStatus,
+      });
+    } else {
+      console.log("its else");
+      res.render("home", {
+        isAuthenticted: false,
+        categroy: categroy,
+        products: productsWithWishlistStatus,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Internal Server Error");
   }
 };
 
@@ -447,13 +464,13 @@ const showShop = async (req, res) => {
     let wishlistProductIds = [];
     if (userID) {
       const userWishlist = await wishlistModel.find({ User: userID }).lean();
-      wishlistProductIds = userWishlist.map(item => item.Product.toString());
+      wishlistProductIds = userWishlist.map((item) => item.Product.toString());
     }
 
-    const productsWithWishlistStatus = products.map(product => {
+    const productsWithWishlistStatus = products.map((product) => {
       return {
         ...product.toObject(),
-        isInWishlist: wishlistProductIds.includes(product._id.toString())
+        isInWishlist: wishlistProductIds.includes(product._id.toString()),
       };
     });
 
@@ -477,13 +494,13 @@ const showSpecial = async (req, res) => {
     let wishlistProductIds = [];
     if (userID) {
       const userWishlist = await wishlistModel.find({ User: userID }).lean();
-      wishlistProductIds = userWishlist.map(item => item.Product.toString());
+      wishlistProductIds = userWishlist.map((item) => item.Product.toString());
     }
 
-    const productsWithWishlistStatus = products.map(product => {
+    const productsWithWishlistStatus = products.map((product) => {
       return {
         ...product.toObject(),
-        isInWishlist: wishlistProductIds.includes(product._id.toString())
+        isInWishlist: wishlistProductIds.includes(product._id.toString()),
       };
     });
 
@@ -496,7 +513,6 @@ const showSpecial = async (req, res) => {
     console.log(error);
   }
 };
-
 
 const showParty = async (req, res) => {
   try {
@@ -509,13 +525,13 @@ const showParty = async (req, res) => {
     let wishlistProductIds = [];
     if (userID) {
       const userWishlist = await wishlistModel.find({ User: userID }).lean();
-      wishlistProductIds = userWishlist.map(item => item.Product.toString());
+      wishlistProductIds = userWishlist.map((item) => item.Product.toString());
     }
 
-    const productsWithWishlistStatus = products.map(product => {
+    const productsWithWishlistStatus = products.map((product) => {
       return {
         ...product.toObject(),
-        isInWishlist: wishlistProductIds.includes(product._id.toString())
+        isInWishlist: wishlistProductIds.includes(product._id.toString()),
       };
     });
 
@@ -529,28 +545,46 @@ const showParty = async (req, res) => {
   }
 };
 
-
 const showProductDetails = async (req, res) => {
   try {
-    const categroy = await catModel.find({ isActvie: true });
+    const userID = req.cookies.userID;
+    const category = await catModel.find({ isActvie: true });
     const productID = req.params.product_id;
     const product = await productModel.findById(productID).populate("category");
+
     console.log("productID====>>>", productID);
-    if (product.isActive == false && product.isDeleted == false) {
+
+    let isInWishlist = false;
+    if (userID) {
+      const userWishlist = await wishlistModel.findOne({
+        User: userID,
+        Product: productID,
+      });
+      isInWishlist = !!userWishlist;
+    }
+
+    if (product.isActive === false && product.isDeleted === false) {
       res.render("productDetail", {
         isAuthenticted: true,
-        categroy: categroy,
-        product: product,
+        categroy: category,
+        product: {
+          ...product.toObject(),
+          isInWishlist: isInWishlist,
+        },
       });
     } else {
       res.render("productDetail", {
         isAuthenticted: false,
-        categroy: categroy,
-        products: product,
+        categroy: category,
+        product: {
+          ...product.toObject(),
+          isInWishlist: isInWishlist,
+        },
       });
     }
   } catch (error) {
     console.log(error);
+    res.status(500).send("Internal Server Error");
   }
 };
 
@@ -626,8 +660,6 @@ const updateUser = async (req, res) => {
     console.log(error);
   }
 };
-
-
 
 const addAddressget = async (req, res) => {
   const categroy = await catModel.find({ isActvie: true });
@@ -802,48 +834,284 @@ const deleteAddress = async (req, res) => {
   }
 };
 const addtoCart = async (req, res) => {
-  const ProductID = req.body.productID;
+  console.log("addtoCart is called");
+
+  const MAX_QUANTITY = 10;
+
+  const ProductID = req.body.productID.trim();
   const userID = req.cookies.userID;
+  const Quantity = parseInt(req.body.quantity) || 1;
+
   console.log("ProducID is", ProductID);
   console.log("userID===>>>", userID);
-  if (userID && ProductID) {
-    try {
-      const User = await userModel.findById(userID);
+  console.log("Quantity===>>>", Quantity);
 
-      const product = await productModel.findById(ProductID);
+  try {
+    const User = await userModel.findById(userID);
 
-      if (!User) {
-        console.log("USer not found");
-        return res.status(404).json({ message: "User not found" });
-      } else {
-        if (!product) {
-          console.log("product is not found ");
-          return res.status(404).json({ message: "product not found" });
-        } else {
-        }
-      }
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: "Internal server error" });
+    if (!User) {
+      return res.status(404).json({ message: "User not found" });
     }
+
+    const Product = await productModel.findById(ProductID);
+    console.log("Product===>>>", Product);
+
+    if (!Product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    if (Product.stock < Quantity) {
+      return res.status(400).json({ message: "Product is out of stock" });
+    }
+
+    const existingCartItem = await cartModel.findOne({
+      Product: ProductID,
+      User: userID,
+    });
+    if (existingCartItem) {
+      // If product is already in the cart, increment the quantity
+      const newQuantity = existingCartItem.Quantity + Quantity;
+      if (newQuantity > MAX_QUANTITY) {
+        return res
+          .status(400)
+          .json({
+            message: `You can only add a maximum of ${MAX_QUANTITY} units of this product to the cart`,
+          });
+      }
+      if (Product.stock < newQuantity) {
+        return res.status(400).json({ message: "Insufficient stock" });
+      }
+      existingCartItem.Quantity = newQuantity;
+      await existingCartItem.save();
+    } else {
+      // If product is not in the cart, check if quantity exceeds the max limit
+      if (Quantity > MAX_QUANTITY) {
+        return res
+          .status(400)
+          .json({
+            message: `You can only add a maximum of ${MAX_QUANTITY} units of this product to the cart`,
+          });
+      }
+      const cart = new cartModel({
+        Product: ProductID,
+        User: userID,
+        Quantity,
+      });
+      await cart.save();
+    }
+
+    console.log("CART ADDED SUCCESSFULLY");
+    res.status(200).json({ success: true, message: "Cart added successfully" });
+  } catch (error) {
+    console.error("Error adding to cart:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
-const showCart= async (req, res) => {
+const showCart = async (req, res) => {
+  const userID = req.cookies.userID;
+  try {
+    const categroy = await catModel.find({ isActvie: true });
+    const User = await userModel.findById(userID);
+    if (User) {
+      const cartItems = await cartModel.find({ User: userID }).populate("Product");
 
-  const categroy = await catModel.find({ isActvie: true });  
-    try {
+      let totalAmount = 0;
+      let shippingCost = 0;
+      let total=0;
+      cartItems.forEach(item => {
+        const salePrice = item.Product.salePrice;
+        shippingCost= item.Product.shippingFees
+        const quantity = item.Quantity;
+        totalAmount += salePrice * quantity;
+        total = totalAmount + shippingCost;
+      });
+      console.log("totalAmount", totalAmount);
+      console.log("shippingCost", shippingCost);
+      console.log("total", total);
       res.render("cart", {
         isAuthenticted: true,
         categroy: categroy,
-       
+        cartItems: cartItems,
+        totalAmount: totalAmount,
+        shippingCost:shippingCost,  
+        total:total,
+      });
+    } else {
+      res.status(404).send("User not found");
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+const increaseQuantity = async (req, res) => {
+  const userID = req.cookies.userID;
+  const productID = req.body.productID;
+
+  try {
+    const cartItem = await cartModel
+      .findOne({ User: userID, Product: productID })
+      .populate("Product");
+    if (!cartItem) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Item not found in cart" });
+    }
+
+    if (cartItem.Quantity >= cartItem.Product.stock) {
+      return res.status(400).json({ success: false, message: "Out of stock" });
+    }
+
+    const MAX_QUANTITY = 10; // Maximum quantity limit
+    if (cartItem.Quantity >= MAX_QUANTITY) {
+      return res
+        .status(200)
+        .json({
+          success: false,
+          message: `Maximum quantity of ${MAX_QUANTITY} reached`,
+          maxQuantity: Math.min(cartItem.Product.stock, MAX_QUANTITY),
+          quantity: cartItem.Quantity,
+        });
+    }
+
+    cartItem.Quantity += 1;
+    await cartItem.save();
+
+    res.status(200).json({
+      success: true,
+      quantity: cartItem.Quantity,
+      total: cartItem.Quantity * cartItem.Product.salePrice,
+      maxQuantity: Math.min(cartItem.Product.stock, MAX_QUANTITY),
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+const decreaseQuantity = async (req, res) => {
+  const userID = req.cookies.userID;
+  const productID = req.body.productID;
+
+  try {
+    const cartItem = await cartModel
+      .findOne({ User: userID, Product: productID })
+      .populate("Product");
+    if (!cartItem) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Item not found in cart" });
+    }
+
+    if (cartItem.Quantity <= 1) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Quantity cannot be less than 1" });
+    }
+
+    cartItem.Quantity -= 1;
+    await cartItem.save();
+
+    res.status(200).json({
+      success: true,
+      quantity: cartItem.Quantity,
+      total: cartItem.Quantity * cartItem.Product.salePrice,
+      maxQuantity: Math.min(cartItem.Product.stock, 10),
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+};
+
+
+const removeOneCart = async (req, res) => {
+  try {
+    const userID = req.cookies.userID;
+    const productID = req.params.product_id;
+
+    const User = await userModel.findById(userID);
+
+    if (User) {
+      const cartItem = await cartModel.findOneAndDelete({
+        User: userID,
+        Product: productID,
       });
 
-    } catch (error) {
-      console.log(error);
-    
+      if (!cartItem) {
+        return res.status(404).json({ success: false, message: "Item not found in cart" });
+      }
+
+      const cartItems = await cartModel
+        .find({ User: userID })
+        .populate("Product");
+
+      console.log("Item removed from cart successfully");
+
+      res.json({
+        success: true,
+        message: "Item removed from cart successfully",
+        cart: cartItems,
+      });
+    } else {
+      res.status(404).json({ success: false, message: "User not found" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Failed to remove item from cart" });
   }
-}
+};
+
+const clearSelectedCartItems = async (req, res) => {
+  try {
+    const userID = req.cookies.userID;
+    const { productIDs } = req.body;
+
+    const User = await userModel.findById(userID);
+
+    if (User) {
+      await cartModel.deleteMany({ User: userID, Product: { $in: productIDs } });
+
+      console.log("Selected items removed from cart");
+
+      const cartItems = await cartModel.find({ User: userID }).populate("Product");
+
+      res.json({
+        success: true,
+        message: "Selected items removed from cart",
+        cart: cartItems,
+      });
+    } else {
+      res.status(404).json({ success: false, message: "User not found" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Failed to remove selected items from cart" });
+  }
+};
+
+
+const cartCount = async (req, res) => {
+  try {
+    const userID = req.cookies.userID;
+    const User = await userModel.findById(userID);
+    if (User) {
+      const cartItems = await cartModel
+        .find({ User: userID })
+        .populate("Product");
+      res.json({
+        Count: cartItems.length,
+        isAuthenticated: true,
+        success: true,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ success: false, message: "Failed to fetch cart count" });
+  }
+};
+
 
 const addwishlist = async (req, res) => {
   try {
@@ -856,18 +1124,25 @@ const addwishlist = async (req, res) => {
     if (User) {
       const Product = await productModel.findById(ProductID);
       if (Product) {
-        const existingWishlistItem = await wishlistModel.findOne({ User: userID, Product: ProductID });
+        const existingWishlistItem = await wishlistModel.findOne({
+          User: userID,
+          Product: ProductID,
+        });
         if (existingWishlistItem) {
-          return res.status(400).json({ message: "Product is already in the wishlist" });
+          return res
+            .status(400)
+            .json({ message: "Product is already in the wishlist" });
         } else {
           const wishlist = new wishlistModel({
             User: userID, // Assuming you want to associate wishlist with the user
             Product: ProductID,
-            createdOn: new Date()
+            createdOn: new Date(),
           });
           await wishlist.save();
           console.log("wishlist added successfully");
-          return res.status(200).json({ message: "Wishlist added successfully" });
+          return res
+            .status(200)
+            .json({ message: "Wishlist added successfully" });
         }
       } else {
         return res.status(404).json({ message: "Product not found" });
@@ -881,25 +1156,23 @@ const addwishlist = async (req, res) => {
   }
 };
 const wishlistLoad = async (req, res) => {
-
   const userID = req.cookies.userID;
 
   const categroy = await catModel.find({ isActvie: true });
-  const User= await userModel.findById(userID);
+  const User = await userModel.findById(userID);
 
-  
   try {
-    if(User){
+    if (User) {
       const wishlistItems = await wishlistModel.find({ User: userID }).populate("Product");
-      console.log("wishlistproduct>>>>", wishlistItems);
+      wishlistItems.forEach(item => {
+        item.Product.inStock = item.Product.stock > 0;
+      });
       res.render("wishlist", {
         isAuthenticted: true,
         categroy: categroy,
         wishlistItems: wishlistItems,
-        
-      });
+      }); 
     }
-    
   } catch (error) {
     console.log(error);
     res.status(500).send("An error occurred while loading the wishlist");
@@ -911,42 +1184,52 @@ const removeWishlist = async (req, res) => {
     const userID = req.cookies.userID;
     const ProductID = req.params.product_id;
 
-   
     const User = await userModel.findById(userID);
 
     if (User) {
-
-   
-      await wishlistModel.findOneAndDelete({ User: userID, Product: ProductID });
-      const wishlistItems = await wishlistModel.find({ User: userID }).populate("Product");
+      await wishlistModel.findOneAndDelete({
+        User: userID,
+        Product: ProductID,
+      });
+      const wishlistItems = await wishlistModel
+        .find({ User: userID })
+        .populate("Product");
 
       console.log("Item removed from wishlist successfully");
 
-      res.json({ success: true, message: "Item removed from wishlist successfully",wishlist: wishlistItems });
+      res.json({
+        success: true,
+        message: "Item removed from wishlist successfully",
+        wishlist: wishlistItems,
+      });
     } else {
       res.status(404).json({ success: false, message: "User not found" });
     }
   } catch (error) {
     console.log(error);
-    res.status(500).json({ success: false, message: "Failed to remove item from wishlist" });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to remove item from wishlist" });
   }
 };
 
-
 const wishlistCount = async (req, res) => {
-  
   try {
     const userID = req.cookies.userID;
-    const User= await userModel.findById(userID);
-    if(User){
-      const wishlistItems = await wishlistModel.find({ User: userID }).populate("Product");
-      res.json({ Count: wishlistItems.length ,isAuthenticted: true, success: true});
+    const User = await userModel.findById(userID);
+    if (User) {
+      const wishlistItems = await wishlistModel
+        .find({ User: userID })
+        .populate("Product");
+      res.json({
+        Count: wishlistItems.length,
+        isAuthenticted: true,
+        success: true,
+      });
     }
-   
   } catch (error) {
     console.log(error);
   }
-  
 };
 
 module.exports = {
@@ -970,15 +1253,20 @@ module.exports = {
   updateUserPassword,
   updateUser,
   updateUserGet,
-  wishlistLoad,
   addAddressget,
   addAddress,
   editAddressGet,
   editAddress,
   deleteAddress,
-  addtoCart,
-  showCart,
+  wishlistLoad,
   addwishlist,
   removeWishlist,
   wishlistCount,
+  addtoCart,
+  showCart,
+  decreaseQuantity,
+  increaseQuantity,
+  removeOneCart,
+  clearSelectedCartItems,
+  cartCount,
 };

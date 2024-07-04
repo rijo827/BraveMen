@@ -62,8 +62,12 @@
                                 </div>
                                 <div class="header-action-icon-2">
                                     <a class="mini-cart-icon" href="/cart">
+                                        <% if (isAuthenticted) { %>
                                         <img alt="Evara" src="/imgs/theme/icons/icon-cart.svg">
-                                        <span class="pro-count blue">2</span>
+                                        <span class="pro-count blue" id="cart-count"></span>
+                                        <% } else { %>
+                                        <img alt="Evara" src="/imgs/theme/icons/icon-cart.svg">
+                                        <% } %>
                                     </a>
                                 </div>  
 

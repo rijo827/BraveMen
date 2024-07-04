@@ -102,8 +102,9 @@
                                             <span class="old-price">$<%= product.regularPrice %></span>
                                         </div>
                                         <div class="product-action-1 show">
-                                            <a aria-label="Add To Cart" class="action-btn hover-up" href="shop-cart.html"><i class="fi-rs-shopping-bag-add"></i></a>
-                                        </div>
+                                            <a aria-label="Add To Cart" class="action-btn hover-up add-to-cart-btn" data-product-id="<%= product._id %> " href="#"><i class="fi-rs-shopping-bag-add"></i></a>
+                                          </div>
+                                          
                                     </div>
                                 </div>
 
@@ -304,8 +305,59 @@
             });
         }
 
-        // Update wishlist count on page load
-        // updateWishlistCount();
-    // });
+        document.addEventListener('DOMContentLoaded', function() {
+  const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+
+  addToCartButtons.forEach(button => {
+    button.addEventListener('click', function(event) {
+      event.preventDefault();
+      
+      const productID = this.getAttribute('data-product-id');
+      console.log('Product ID:', productID);
+
+      // Send AJAX request to add the product to the cart
+      fetch('/addtocart/',{
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productID: productID, quantity: 1 }) // You can customize the quantity as needed
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          alert('Product added to cart successfully!');
+          updateCartCount()
+          // Optionally update the cart UI here
+        } else {
+          alert(data.message || 'Failed to add product to cart.');
+        }
+      })
+      .catch(error => {
+        console.error('Error adding product to cart:', error);
+        alert('An error occurred. Please try again.');
+      });
+    });
+  });
+});
+
+function updateCartCount() {
+        $.ajax({
+            url: '/cartcount',
+            method: 'GET',
+            success: function(response) {
+                const cartCountElement = $('#cart-count');
+                if (response.Count > 0) {
+                    cartCountElement.text(response.Count);
+                    cartCountElement.show();
+                } else {
+                    cartCountElement.hide();
+                }
+            },
+            error: function(error) {
+                console.error('Error fetching cart count:', error);
+            }
+        });
+    }
       </script>
       

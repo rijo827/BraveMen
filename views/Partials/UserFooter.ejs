@@ -185,6 +185,29 @@
         // Update wishlist count on page load
         updateWishlistCount();
     });
+    $(document).ready(function() {
+    function updateCartCount() {
+        $.ajax({
+            url: '/cartcount',
+            method: 'GET',
+            success: function(response) {
+                const cartCountElement = $('#cart-count');
+                if (response.Count > 0) {
+                    cartCountElement.text(response.Count);
+                    cartCountElement.show();
+                } else {
+                    cartCountElement.hide();
+                }
+            },
+            error: function(error) {
+                console.error('Error fetching cart count:', error);
+            }
+        });
+    }
+
+    // Update cart count on page load
+    updateCartCount();
+});
 
 
 

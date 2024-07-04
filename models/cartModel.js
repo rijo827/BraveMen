@@ -4,6 +4,11 @@ const {ObjectId} = mongoose.Schema;
 
 const cartSchema= new mongoose.Schema({
   
+
+    User : {
+        type:ObjectId,
+        ref:"UserDetails",
+    },
     Product:{
         type:ObjectId,
         ref:"ProductDetails",

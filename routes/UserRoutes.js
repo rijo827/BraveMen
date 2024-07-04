@@ -33,6 +33,14 @@ userroute.get('/logout', userControler.loggoutUser)
 
 
 userroute.get('/cart',userMiddleware.islogin,userControler.showCart)
+userroute.post('/addtocart',userMiddleware.islogin,userControler.addtoCart)
+userroute.post('/removeonecart/:product_id',userMiddleware.islogin,userControler.removeOneCart)
+userroute.post('/removeallcart',userMiddleware.islogin,userControler.clearSelectedCartItems)
+userroute.post('/cart/increase', userMiddleware.islogin, userControler.increaseQuantity);
+userroute.post('/cart/decrease', userMiddleware.islogin, userControler.decreaseQuantity);
+userroute.get('/cartcount', userMiddleware.islogin, userControler.cartCount);
+
+
 
 
 

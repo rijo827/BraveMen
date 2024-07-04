@@ -35,14 +35,7 @@ const UserSchema = new mongoose.Schema({
   jwt_token: {
     type: String
   },
-  // cart:{
-  //   type:ObjectId,
-  //   ref:"cartDetails",
-  // }
-  wishlist:{
-    type:ObjectId,
-    ref:"wishlistDetails",
-},
+
 });
 
 UserSchema.pre('save', async function (next) {
